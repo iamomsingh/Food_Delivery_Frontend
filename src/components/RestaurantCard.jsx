@@ -9,15 +9,25 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+import { Link } from "react-router";
 
-function RestaurantCard({ restaurant, onView }) {
+function RestaurantCard({ restaurant }) {
   return (
     <Card
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        "&:hover": {
+          transform: {
+            md: "translateY(-4px)",
+          },
+
+          boxShadow: {
+            md: 6,
+          },
+        },
       }}
     >
       <CardMedia
@@ -47,16 +57,32 @@ function RestaurantCard({ restaurant, onView }) {
           {restaurant.cuisine}
         </Typography>
 
-        <Typography variant='body2' sx={{ mt: 1 }}>
-          {restaurant.deliveryMinutes} min
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          <Typography variant='body2'>
+            {restaurant.deliveryMinutes} min
+          </Typography>
+
+          <Typography variant='body2' color='text.secondary'>
+            {restaurant.deliveryFee === 0
+              ? "Free delivery"
+              : `₹${restaurant.deliveryFee} delivery`}
+          </Typography>
+        </Box>
       </CardContent>
 
       <CardActions sx={{ px: 2, pb: 2 }}>
         <Button
           fullWidth
           variant='contained'
-          onClick={() => onView(restaurant)}
+          component={Link}
+          to={`/restaurants/${restaurant.id}`}
         >
           View Restaurant
         </Button>

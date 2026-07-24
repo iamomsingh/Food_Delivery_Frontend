@@ -6,13 +6,16 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import App from "./App.jsx";
 import theme from "./theme/theme.js";
+import { BrowserRouter } from "react-router";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
 
-      <App />
-    </ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import RestaurantCard from "./RestaurantCard";
 
-function RestaurantList({ restaurants, onRestaurantView }) {
+function RestaurantList({ restaurants }) {
   if (restaurants.length === 0) {
     return (
       <Typography color='text.secondary' sx={{ mt: 4 }}>
@@ -26,11 +26,7 @@ function RestaurantList({ restaurants, onRestaurantView }) {
       }}
     >
       {restaurants.map((restaurant) => (
-        <RestaurantCard
-          key={restaurant.id}
-          restaurant={restaurant}
-          onView={onRestaurantView}
-        />
+        <RestaurantCard key={restaurant.id} restaurant={restaurant} />
       ))}
     </Box>
   );

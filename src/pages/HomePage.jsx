@@ -1,48 +1,49 @@
 import { useState } from "react";
+
+import { Box, Container } from "@mui/material";
+
+import HeroSection from "../components/HeroSection";
+import RestaurantFilters from "../components/RestaurantFilters";
 import RestaurantList from "../components/RestaurantList";
+
 import { restaurants } from "../data/restaurants";
-import { Box, Button, Container, Typography } from "@mui/material";
 
 function HomePage() {
-  const [showTopRated, setShowTopRated] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("All");
 
-  const visibleRestaurants = showTopRated
-    ? restaurants.filter((restaurant) => restaurant.rating >= 4.5)
-    : restaurants;
+  let visibleRestaurants = restaurants;
 
-  function handleRestaurantClick(restaurant) {
-    console.log("Selected:", restaurant);
+  if (activeFilter === "Top Rated") {
+    visibleRestaurants = restaurants.filter(
+      (restaurant) => restaurant.rating >= 4.5,
+    );
+  }
+
+  if (activeFilter === "Fast Delivery") {
+    visibleRestaurants = restaurants.filter(
+      (restaurant) => restaurant.deliveryMinutes <= 25,
+    );
+  }
+
+  if (activeFilter === "Free Delivery") {
+    visibleRestaurants = restaurants.filter(
+      (restaurant) => restaurant.deliveryFee === 0,
+    );
   }
 
   return (
-    <Container maxWidth='lg'>
-      <Box
-        component='main'
-        sx={{
-          py: 4,
-        }}
-      >
-        <Typography variant='h4' component='h1' sx={{ mb: 1, fontWeight: 700 }}>
-          Discover restaurants near you
-        </Typography>
+    <Box component='main'>
+      <Container maxWidth='lg'>
+        <HeroSection />
 
-        <Typography color='text.secondary' sx={{ mb: 3 }}>
-          Explore delicious food from restaurants around you.
-        </Typography>
-      </Box>
+        <RestaurantFilters
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
 
-      <Button
-        variant={showTopRated ? "outlined" : "contained"}
-        onClick={() => setShowTopRated((current) => !current)}
-      >
-        {showTopRated ? "Show All Restaurants" : "Show Top Rated"}
-      </Button>
-
-      <RestaurantList
-        restaurants={visibleRestaurants}
-        onRestaurantView={handleRestaurantClick}
-      />
-    </Container>
+        <RestaurantList restaurants={visibleRestaurants} />
+      </Container>
+    </Box>
   );
 }
 
