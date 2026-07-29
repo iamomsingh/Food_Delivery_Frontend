@@ -1,42 +1,10 @@
 import { createTheme } from "@mui/material/styles";
+import palette from "./palette";
+import typography from "./typography";
 
 const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#E23744",
-    },
-
-    background: {
-      default: "#FAFAFA",
-      paper: "#FFFFFF",
-    },
-
-    text: {
-      primary: "#1C1C1C",
-      secondary: "#696969",
-    },
-  },
-
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-
-    h1: {
-      fontWeight: 700,
-    },
-
-    h2: {
-      fontWeight: 700,
-    },
-
-    h3: {
-      fontWeight: 600,
-    },
-
-    button: {
-      textTransform: "none",
-      fontWeight: 600,
-    },
-  },
+  palette,
+  typography,
 
   shape: {
     borderRadius: 12,

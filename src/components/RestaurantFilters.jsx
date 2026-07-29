@@ -4,8 +4,8 @@ function RestaurantFilters({ activeFilter, onFilterChange }) {
   const filters = ["All", "Top Rated", "Fast Delivery", "Free Delivery"];
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant='h5' component='h2' fontWeight={700} sx={{ mb: 2 }}>
+    <Box sx={{ my: 2 }}>
+      <Typography variant='h5' component='h2' sx={{ mb: 2 }}>
         Popular near you
       </Typography>
 

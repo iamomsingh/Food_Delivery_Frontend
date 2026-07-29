@@ -5,6 +5,7 @@ import { Box, Container } from "@mui/material";
 import HeroSection from "../components/HeroSection";
 import RestaurantFilters from "../components/RestaurantFilters";
 import RestaurantList from "../components/RestaurantList";
+import CategorySection from "../components/CategorySection";
 
 import { restaurants } from "../data/restaurants";
 
@@ -35,6 +36,8 @@ function HomePage() {
     <Box component='main'>
       <Container maxWidth='lg'>
         <HeroSection />
+
+        <CategorySection />
 
         <RestaurantFilters
           activeFilter={activeFilter}

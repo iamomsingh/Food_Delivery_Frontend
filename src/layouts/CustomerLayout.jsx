@@ -1,13 +1,26 @@
 import { Outlet } from "react-router";
-
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { Box, Container } from "@mui/material";
 
 function CustomerLayout() {
   return (
     <>
       <Navbar />
 
-      <Outlet />
+      <Container maxWidth='xl'>
+        <Box
+          component='main'
+          sx={{
+            minHeight: "80vh",
+            py: 4,
+          }}
+        >
+          <Outlet />
+        </Box>
+      </Container>
+
+      <Footer />
     </>
   );
 }
