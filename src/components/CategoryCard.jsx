@@ -1,15 +1,19 @@
 import { Card, CardActionArea, Typography } from "@mui/material";
 
-function CategoryCard({ category }) {
+function CategoryCard({ category, selected, onSelect }) {
   return (
     <Card
       elevation={2}
       sx={{
+        border: selected ? "2px solid" : "1px solid",
+        borderColor: selected ? "primary.main" : "divider",
+        bgcolor: selected ? "primary.light" : "background.paper",
         minWidth: 108,
         borderRadius: 1.5,
       }}
     >
       <CardActionArea
+        onClick={onSelect}
         sx={{
           py: 3,
           px: 2,

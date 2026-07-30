@@ -8,7 +8,7 @@ import {
 
 import SearchIcon from "@mui/icons-material/Search";
 
-function HeroSection() {
+function HeroSection({ searchTerm, onSearchChange }) {
   return (
     <Box component='section'>
       <Stack
@@ -47,6 +47,8 @@ function HeroSection() {
               borderRadius: 3,
             },
           }}
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </Stack>
     </Box>

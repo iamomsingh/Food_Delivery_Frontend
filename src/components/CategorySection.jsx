@@ -3,7 +3,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import CategoryCard from "./CategoryCard";
 import { categories } from "../data/categoriesData";
 
-function CategorySection() {
+function CategorySection({ selectedCategory, setSelectedCategory }) {
   return (
     <Box
       component='section'
@@ -29,7 +29,12 @@ function CategorySection() {
           }}
         >
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard
+              key={category.id}
+              category={category}
+              selected={selectedCategory === category.name}
+              onSelect={() => setSelectedCategory(category.name)}
+            />
           ))}
         </Stack>
       </Stack>

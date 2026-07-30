@@ -65,9 +65,7 @@ function RestaurantCard({ restaurant }) {
             mt: 2,
           }}
         >
-          <Typography variant='body2'>
-            {restaurant.deliveryMinutes} min
-          </Typography>
+          <Typography variant='body2'>{restaurant.deliveryTime}</Typography>
 
           <Typography variant='body2' color='text.secondary'>
             {restaurant.deliveryFee === 0

@@ -11,6 +11,8 @@ import { restaurants } from "../data/restaurants";
 
 function HomePage() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   let visibleRestaurants = restaurants;
 
@@ -22,7 +24,7 @@ function HomePage() {
 
   if (activeFilter === "Fast Delivery") {
     visibleRestaurants = restaurants.filter(
-      (restaurant) => restaurant.deliveryMinutes <= 25,
+      (restaurant) => restaurant.deliveryTime <= 25,
     );
   }
 
@@ -32,19 +34,33 @@ function HomePage() {
     );
   }
 
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const matchesSearch = restaurant.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "All" || restaurant.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <Box component='main'>
       <Container maxWidth='lg'>
-        <HeroSection />
+        <HeroSection searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-        <CategorySection />
+        <CategorySection
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />
 
         <RestaurantFilters
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
         />
 
-        <RestaurantList restaurants={visibleRestaurants} />
+        <RestaurantList restaurants={filteredRestaurants} />
       </Container>
     </Box>
   );
