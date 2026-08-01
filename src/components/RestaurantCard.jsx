@@ -32,8 +32,8 @@ function RestaurantCard({ restaurant }) {
     >
       <CardMedia
         component='img'
-        height='180'
-        image={restaurant.imageUrl || "https://placehold.co/600x400"}
+        sx={{ height: "180", objectFit: "cover" }}
+        image={restaurant.coverImageUrl || "https://placehold.co/600x400"}
         alt={restaurant.name}
       />
 
@@ -50,11 +50,11 @@ function RestaurantCard({ restaurant }) {
             {restaurant.name}
           </Typography>
 
-          <Chip label={`${restaurant.rating} ★`} size='small' />
+          <Chip label={`${restaurant.averageRating} ★`} size='small' />
         </Box>
 
         <Typography variant='body2' color='text.secondary'>
-          {restaurant.cuisine}
+          {restaurant.description}
         </Typography>
 
         <Box
