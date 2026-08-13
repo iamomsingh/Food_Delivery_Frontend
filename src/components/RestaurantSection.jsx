@@ -9,8 +9,16 @@ import {
 } from "@mui/material";
 
 import RestaurantList from "./RestaurantList";
+import RestaurantListPage from "../pages/RestaurantListPage";
 
-function RestaurantSection({ restaurants, sortBy, onSortChange }) {
+function RestaurantSection({
+  searchTerm,
+  selectedCategory,
+  sortBy,
+  onSortChange,
+  clearFilters,
+  onRetry,
+}) {
   return (
     <Box
       component='section'
@@ -44,7 +52,13 @@ function RestaurantSection({ restaurants, sortBy, onSortChange }) {
           </FormControl>
         </Stack>
 
-        <RestaurantList restaurants={restaurants} />
+        <RestaurantList
+          searchTerm={searchTerm}
+          selectedCategory={selectedCategory}
+          sortBy={sortBy}
+          clearFilters={clearFilters}
+          onRetry={onRetry}
+        />
       </Stack>
     </Box>
   );

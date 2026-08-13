@@ -1,12 +1,24 @@
-import { Container, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
+
+import CartHeader from "../components/cart/CartHeader";
+import CartItemsList from "../components/cart/CartItemsList";
+import OrderSummary from "../components/cart/OrderSummary";
 
 function CartPage() {
   return (
-    <Container maxWidth='lg' sx={{ py: 4 }}>
-      <Typography variant='h4' component='h1' fontWeight={700}>
-        Your Cart
-      </Typography>
-    </Container>
+    <>
+      <CartHeader />
+
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <CartItemsList />
+        </Grid>
+
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <OrderSummary />
+        </Grid>
+      </Grid>
+    </>
   );
 }
 

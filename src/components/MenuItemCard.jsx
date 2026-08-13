@@ -1,18 +1,28 @@
+import { useDispatch, useSelector } from "react-redux";
+
 import {
   Box,
   Button,
+  ButtonGroup,
   Card,
   CardMedia,
   Chip,
   Stack,
   Typography,
 } from "@mui/material";
-
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import FoodTypeIndicator from "./FoodTypeIndicator";
 
 function MenuItemCard({ menuItem }) {
+  const cart = useSelector((state) => state.cart.cart);
+
+  const cartItem = cart?.items?.find(
+    (item) => item.menuItem.id === menuItem.id,
+  );
+
+  const quantity = cartItem?.quantity || 0;
+
   const hasDiscount =
     menuItem.discountedPrice &&
     Number(menuItem.discountedPrice) < Number(menuItem.price);
@@ -60,7 +70,7 @@ function MenuItemCard({ menuItem }) {
 
         <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 1 }}>
           <Typography variant='h6' fontWeight={700} color='primary'>
-            ₹{finalPrice}
+            ₹{menuItem.discountedPrice}
           </Typography>
 
           {hasDiscount && (
@@ -138,21 +148,45 @@ function MenuItemCard({ menuItem }) {
           }}
         />
 
-        <Button
-          fullWidth
-          variant='contained'
-          disabled={!menuItem.isAvailable}
-          sx={{
-            position: "absolute",
-            bottom: -18,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 120,
-            borderRadius: 5,
-          }}
-        >
-          {menuItem.isAvailable ? "ADD" : "OUT OF STOCK"}
-        </Button>
+        {quantity === 0 ? (
+          <Button
+            fullWidth
+            variant='contained'
+            // disabled={!menuItem.isAvailable}
+            sx={{
+              position: "absolute",
+              bottom: -18,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 120,
+              borderRadius: 5,
+            }}
+            // onClick={() => addToCart(menuItem)}
+          >
+            {menuItem.isAvailable ? "ADD" : "OUT OF STOCK"}
+          </Button>
+        ) : (
+          <ButtonGroup
+            variant='contained'
+            sx={{
+              position: "absolute",
+              bottom: -18,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 120,
+
+              "& .MuiButton-root": {
+                minWidth: 40,
+              },
+            }}
+          >
+            <Button>-</Button>
+
+            <Button>{quantity}</Button>
+
+            <Button>+</Button>
+          </ButtonGroup>
+        )}
       </Box>
     </Card>
   );

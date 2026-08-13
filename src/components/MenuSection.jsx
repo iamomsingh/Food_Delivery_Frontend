@@ -12,7 +12,9 @@ function MenuSection({ menus }) {
           key={menu.id}
           menu={menu}
           expanded={expandedMenu === menu.id}
-          onChange={() => setExpandedMenu(menu.id)}
+          onChange={(event, expanded) =>
+            setExpandedMenu(expanded ? menu.id : null)
+          }
         />
       ))}
     </Stack>

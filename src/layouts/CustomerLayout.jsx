@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Box, Container } from "@mui/material";
+import { CartProvider } from "../context/CartContext";
 
 function CustomerLayout() {
   return (

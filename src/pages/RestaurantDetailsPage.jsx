@@ -1,57 +1,44 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Box, Container, Typography } from "@mui/material";
+
 import RestaurantHeader from "../components/RestaurantHeader";
 import MenuSection from "../components/MenuSection";
-import { getRestaurantDetails } from "../api/restaurantApi";
 import RestaurantGridSkeleton from "../components/RestaurantGridSkeleton";
 import ErrorState from "../components/ErrorState";
 
-function RestaurantDetailsPage() {
-  const [restaurant, setRestaurant] = useState(null);
-  const [menus, setMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+import { fetchRestaurantDetails } from "../features/restaurants/restaurantSlice";
 
+function RestaurantDetailsPage() {
   const { restaurantId } = useParams();
 
-  async function fetchRestaurantDetails() {
-    try {
-      setLoading(true);
-      setError(null);
+  const dispatch = useDispatch();
 
-      const data = await getRestaurantDetails(restaurantId);
-
-      setRestaurant(data.restaurant);
-
-      setMenus(data.menus);
-    } catch (error) {
-      console.error(error);
-
-      setError("Failed to load restaurant.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { restaurantDetails, detailsLoading, detailsError } = useSelector(
+    (state) => state.restaurant,
+  );
 
   useEffect(() => {
-    fetchRestaurantDetails();
-  }, [restaurantId]);
+    dispatch(fetchRestaurantDetails(restaurantId));
+  }, [dispatch, restaurantId]);
 
-  if (loading) {
+  if (detailsLoading || !restaurantDetails) {
     return <RestaurantGridSkeleton />;
   }
 
-  if (error) {
+  if (!restaurantDetails || detailsError) {
     return (
       <ErrorState
         title='Unable to load restaurant'
-        message={error}
-        onRetry={fetchRestaurantDetails}
+        message={detailsError}
+        onRetry={() => dispatch(fetchRestaurantDetails(restaurantId))}
       />
     );
   }
+
+  const { restaurant, menus } = restaurantDetails;
 
   return (
     <Box component='main'>

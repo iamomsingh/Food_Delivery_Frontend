@@ -14,8 +14,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PersonIcon from "@mui/icons-material/Person";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 
 function Navbar() {
+  const totalItems = useSelector((state) => state.cart.totalItems);
+
   return (
     <AppBar
       position='sticky'
@@ -58,7 +61,7 @@ function Navbar() {
               gap: 1,
             }}
           >
-            <Button component={Link} to='/' color='inherit'>
+            <Button component={Link} to='/restaurants' color='inherit'>
               Restaurants
             </Button>
 
@@ -67,7 +70,7 @@ function Navbar() {
             </Button>
 
             <IconButton component={Link} to='/cart'>
-              <Badge badgeContent={0} color='primary'>
+              <Badge badgeContent={totalItems} color='primary'>
                 <ShoppingCartIcon />
               </Badge>
             </IconButton>
