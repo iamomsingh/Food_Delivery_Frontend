@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+
+import { Link, Navigate } from "react-router-dom";
 
 import { Box, Button, TextField, Typography } from "@mui/material";
+import { login } from "../features/auth/authSlice";
 
 function LoginPage() {
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const { loading, error } = useSelector((state) => state.auth);
 
   // Handle change
   function handleChange(event) {
@@ -17,6 +24,16 @@ function LoginPage() {
       ...previousData,
       [name]: value,
     }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const result = await dispatch(login(formData));
+
+    if (login.fulfilled.match(result)) {
+      Navigate("/register");
+    }
   }
 
   return (
@@ -41,6 +58,7 @@ function LoginPage() {
 
       <Box
         component='form'
+        onSubmit={handleSubmit}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -65,8 +83,15 @@ function LoginPage() {
           onChange={handleChange}
         />
 
-        <Button type='submit' variant='contained' size='large'>
-          Login
+        {error && <Typography color='error'>{error}</Typography>}
+
+        <Button
+          type='submit'
+          variant='contained'
+          size='large'
+          disabled={loading}
+        >
+          {loading ? "Logging in ..." : "Login"}
         </Button>
       </Box>
 

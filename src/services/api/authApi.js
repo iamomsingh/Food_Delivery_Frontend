@@ -1,0 +1,31 @@
+import api from "./axios";
+
+export async function registerUser(userData) {
+  const response = await api.post("/auth/register", userData);
+
+  return response.data.data;
+}
+
+export async function loginUser(credentials) {
+  const response = await api.post("/auth/login", credentials);
+
+  return response.data.data;
+}
+
+export async function refreshAccessToken() {
+  const response = await api.post("/auth/refresh");
+
+  return response.data.data;
+}
+
+export async function getCurrentUser() {
+  const response = await api.get("/auth/me");
+
+  return response.data.data;
+}
+
+export async function logoutUser() {
+  const response = await api.post("/auth/logout");
+
+  return response.data;
+}
