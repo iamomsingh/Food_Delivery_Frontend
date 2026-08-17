@@ -13,8 +13,15 @@ import {
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import FoodTypeIndicator from "./FoodTypeIndicator";
+import {
+  addCartItem,
+  updateCartItemQuantity,
+  deleteCartItem,
+} from "../features/cart/cartSlice";
 
 function MenuItemCard({ menuItem }) {
+  const dispatch = useDispatch();
+
   const cart = useSelector((state) => state.cart.cart);
 
   const cartItem = cart?.items?.find(
@@ -152,7 +159,7 @@ function MenuItemCard({ menuItem }) {
           <Button
             fullWidth
             variant='contained'
-            // disabled={!menuItem.isAvailable}
+            disabled={!menuItem.isAvailable}
             sx={{
               position: "absolute",
               bottom: -18,
@@ -161,7 +168,9 @@ function MenuItemCard({ menuItem }) {
               width: 120,
               borderRadius: 5,
             }}
-            // onClick={() => addToCart(menuItem)}
+            onClick={() =>
+              dispatch(addCartItem({ menuItemId: menuItem.id, quantity: 1 }))
+            }
           >
             {menuItem.isAvailable ? "ADD" : "OUT OF STOCK"}
           </Button>
@@ -180,11 +189,40 @@ function MenuItemCard({ menuItem }) {
               },
             }}
           >
-            <Button>-</Button>
+            <Button
+              onClick={() => {
+                if (quantity === 1) {
+                  dispatch(deleteCartItem(cartItem.cartItemId));
+                } else {
+                  dispatch(
+                    updateCartItemQuantity({
+                      cartItemId: cartItem.cartItemId,
+                      quantity: quantity - 1,
+                    }),
+                  );
+                }
+              }}
+            >
+              -
+            </Button>
 
-            <Button>{quantity}</Button>
+            <Button disabled>{quantity}</Button>
 
-            <Button>+</Button>
+            <Button
+              disabled={!cartItem || !menuItem.isAvailable}
+              onClick={() => {
+                if (!cartItem) return;
+
+                dispatch(
+                  updateCartItemQuantity({
+                    cartItemId: cartItem.cartItemId,
+                    quantity: quantity + 1,
+                  }),
+                );
+              }}
+            >
+              +
+            </Button>
           </ButtonGroup>
         )}
       </Box>

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { Box, Container } from "@mui/material";
 
 import { fetchRestaurants } from "../features/restaurants/restaurantSlice";
+import { fetchCart } from "../features/cart/cartSlice";
 
 import HeroSection from "../components/HeroSection";
 import CategorySection from "../components/CategorySection";
@@ -18,6 +19,7 @@ function HomePage() {
 
   useEffect(() => {
     dispatch(fetchRestaurants());
+    dispatch(fetchCart());
   }, [dispatch]);
 
   function clearFilters() {

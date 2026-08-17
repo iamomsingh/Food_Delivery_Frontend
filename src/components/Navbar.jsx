@@ -13,11 +13,13 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PersonIcon from "@mui/icons-material/Person";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function Navbar() {
-  const totalItems = useSelector((state) => state.cart.totalItems);
+  const navigate = useNavigate();
+
+  const totalItems = useSelector((state) => state.cart.cart?.totalItems || 0);
 
   return (
     <AppBar
@@ -69,8 +71,13 @@ function Navbar() {
               Orders
             </Button>
 
-            <IconButton component={Link} to='/cart'>
-              <Badge badgeContent={totalItems} color='primary'>
+            <IconButton onClick={() => navigate("/cart")}>
+              <Badge
+                badgeContent={totalItems}
+                color='primary'
+                max={99}
+                invisible={totalItems === 0}
+              >
                 <ShoppingCartIcon />
               </Badge>
             </IconButton>
