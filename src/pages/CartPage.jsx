@@ -1,24 +1,100 @@
-import { Grid } from "@mui/material";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import CartHeader from "../components/cart/CartHeader";
-import CartItemsList from "../components/cart/CartItemsList";
-import OrderSummary from "../components/cart/OrderSummary";
+import { Box, Container, Stack, Typography } from "@mui/material";
+
+import { fetchCart } from "../features/cart/cartSlice";
+
+import CartRestaurantHeader from "../components/cart/CartRestaurantHeader";
+import CartItemList from "../components/cart/CartItemsList";
+import CartSummary from "../components/cart/CartSummary";
+import EmptyCart from "../components/cart/EmptyCart";
+import ErrorState from "../components/ErrorState";
+import CartPageSkeleton from "../components/cart/CartPageSkeleton";
 
 function CartPage() {
+  const dispatch = useDispatch();
+
+  const { cart, loading, error } = useSelector((state) => state.cart);
+
+  if (loading) {
+    return (
+      <Box component='main'>
+        <Container maxWidth='lg' sx={{ py: 5 }}>
+          <Typography variant='h4' fontWeight={700} sx={{ mb: 4 }}>
+            Your Cart
+          </Typography>
+
+          <CartPageSkeleton />
+        </Container>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box component='main'>
+        <Container maxWidth='lg' sx={{ py: 5 }}>
+          <Typography variant='h4' fontWeight={700} sx={{ mb: 4 }}>
+            Your Cart
+          </Typography>
+
+          <ErrorState
+            title='Unable to load your cart'
+            message={error}
+            onRetry={() => dispatch(fetchCart())}
+          />
+        </Container>
+      </Box>
+    );
+  }
+
+  if (!cart || cart.items.length === 0) {
+    return (
+      <Box component='main'>
+        <Container maxWidth='lg' sx={{ py: 5 }}>
+          <Typography variant='h4' fontWeight={700} sx={{ mb: 4 }}>
+            Your Cart
+          </Typography>
+
+          <EmptyCart />
+        </Container>
+      </Box>
+    );
+  }
+
   return (
-    <>
-      <CartHeader />
+    <Box component='main'>
+      <Container maxWidth='lg'>
+        <Typography variant='h4' fontWeight={700} sx={{ mb: 4 }}>
+          Your Cart
+        </Typography>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <CartItemsList />
-        </Grid>
+        <Box>
+          <CartRestaurantHeader
+            restaurant={cart.restaurant}
+            totalItems={cart.totalItems}
+          />
 
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <OrderSummary />
-        </Grid>
-      </Grid>
-    </>
+          <Box
+            sx={{
+              mt: 4,
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "minmax(0, 1fr) 360px",
+              },
+              gap: 3,
+              alignItems: "start",
+            }}
+          >
+            <CartItemList items={cart.items} />
+
+            <CartSummary pricing={cart.pricing} />
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 

@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { refresh, fetchCurrentUser, setAuthInitialized } from "./authSlice";
+import { fetchCart } from "../cart/cartSlice";
+import { fetchRestaurants } from "../restaurants/restaurantSlice";
 
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();
@@ -15,6 +17,8 @@ function AuthInitializer({ children }) {
 
         if (refresh.fulfilled.match(result)) {
           await dispatch(fetchCurrentUser());
+          await dispatch(fetchRestaurants());
+          await dispatch(fetchCart());
         }
       } finally {
         dispatch(setAuthInitialized());

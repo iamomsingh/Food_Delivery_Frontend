@@ -106,6 +106,7 @@ const cartSlice = createSlice({
 
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.loading = false;
+        state.error = null;
         state.cart = action.payload;
       })
 

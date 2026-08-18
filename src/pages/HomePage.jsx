@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 import { Box, Container } from "@mui/material";
 
@@ -11,16 +10,9 @@ import CategorySection from "../components/CategorySection";
 import RestaurantSection from "../components/RestaurantSection";
 
 function HomePage() {
-  const dispatch = useDispatch();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("default");
-
-  useEffect(() => {
-    dispatch(fetchRestaurants());
-    dispatch(fetchCart());
-  }, [dispatch]);
 
   function clearFilters() {
     setSearchTerm("");
