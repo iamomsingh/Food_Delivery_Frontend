@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   Box,
@@ -21,9 +21,12 @@ import {
 } from "../../features/cart/cartSlice";
 
 function CartItemCard({ item }) {
+  const updatingItemId = useSelector((state) => state.cart.updatingItemId);
   const dispatch = useDispatch();
 
   const { menuItem, quantity, cartItemId } = item;
+
+  const isUpdating = updatingItemId === cartItemId;
 
   const hasDiscount =
     menuItem.discountedPrice &&
@@ -122,14 +125,6 @@ function CartItemCard({ item }) {
 
         {/* Item total */}
         <Box
-          // sx={{
-          //   minWidth: 120,
-          //   display: "flex",
-          //   flexDirection: "column",
-          //   alignItems: "center",
-          //   gap: 1.5,
-          // }}
-
           sx={{
             minWidth: { xs: "100%", sm: 120 },
             display: "flex",
@@ -142,7 +137,6 @@ function CartItemCard({ item }) {
             gap: 1.5,
           }}
         >
-          {/* Quantity Controls */}
           <Box
             sx={{
               display: "flex",
@@ -155,6 +149,7 @@ function CartItemCard({ item }) {
             }}
           >
             <Button
+              disabled={isUpdating}
               onClick={() => {
                 if (quantity === 1) {
                   dispatch(deleteCartItem(cartItemId));
@@ -191,6 +186,7 @@ function CartItemCard({ item }) {
             </Typography>
 
             <Button
+              disabled={isUpdating}
               onClick={() =>
                 dispatch(
                   updateCartItemQuantity({

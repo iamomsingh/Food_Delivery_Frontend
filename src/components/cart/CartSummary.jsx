@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
+
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 function CartSummary({ pricing }) {
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -101,6 +104,7 @@ function CartSummary({ pricing }) {
         fullWidth
         variant='contained'
         size='large'
+        onClick={() => navigate("/checkout")}
         sx={{
           mt: 3,
           borderRadius: 2,

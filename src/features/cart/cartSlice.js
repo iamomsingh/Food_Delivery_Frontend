@@ -13,6 +13,7 @@ const initialState = {
   error: null,
 
   updating: false,
+  updatingItemId: null,
 };
 
 export const fetchCart = createAsyncThunk(
@@ -90,6 +91,10 @@ export const clearCartValue = createAsyncThunk(
   },
 );
 
+function replaceCart(state, newCart) {
+  state.cart = newCart;
+}
+
 const cartSlice = createSlice({
   name: "cart",
 
@@ -132,18 +137,18 @@ const cartSlice = createSlice({
       })
 
       // update cart items
-      .addCase(updateCartItemQuantity.pending, (state) => {
-        state.updating = true;
+      .addCase(updateCartItemQuantity.pending, (state, action) => {
+        state.updatingItemId = action.meta.arg.cartItemId;
         state.error = null;
       })
 
       .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
-        state.updating = false;
-        state.cart = action.payload;
+        state.updatingItemId = null;
+        replaceCart(state, action.payload);
       })
 
       .addCase(updateCartItemQuantity.rejected, (state, action) => {
-        state.updating = false;
+        state.updatingItemId = null;
         state.error = action.payload || "Unable to update cart item.";
       })
 
