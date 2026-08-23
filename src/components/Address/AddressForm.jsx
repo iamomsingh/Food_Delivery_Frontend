@@ -91,19 +91,11 @@ function AddressForm({
         ? editAddress.fulfilled.match(result)
         : addAddress.fulfilled.match(result)
     ) {
+      setFormData(emptyForm);
       onSuccess?.();
     }
   }
 
-  //     const result = await dispatch(addAddress(addressData));
-  //
-  //     if (addAddress.fulfilled.match(result)) {
-  //       setFormData(initialFormData);
-  //
-  //       onSuccess?.();
-  //     }
-  //   }
-  //
   return (
     <Box component='form' onSubmit={handleSubmit}>
       <Stack spacing={2}>

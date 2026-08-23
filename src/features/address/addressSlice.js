@@ -17,6 +17,7 @@ const initialState = {
 
   creating: false,
   updating: false,
+  updatingAddressId: null,
   deleting: false,
 };
 
@@ -105,13 +106,15 @@ const addressSlice = createSlice({
       })
 
       // Update address
-      .addCase(editAddress.pending, (state) => {
+      .addCase(editAddress.pending, (state, action) => {
         state.updating = true;
+        state.updatingAddressId = action.meta.arg.addressId;
         state.error = null;
       })
 
       .addCase(editAddress.fulfilled, (state, action) => {
         state.updating = false;
+        state.updatingAddressId = null;
 
         const index = state.addresses.findIndex(
           (address) => address.id === action.payload.id,
@@ -124,17 +127,20 @@ const addressSlice = createSlice({
 
       .addCase(editAddress.rejected, (state, action) => {
         state.updating = false;
+        state.updatingAddressId = null;
         state.error = action.error.message;
       })
 
       // Make default address
-      .addCase(setDefaultAddress.pending, (state) => {
+      .addCase(setDefaultAddress.pending, (state, action) => {
         state.updating = true;
+        state.updatingAddressId = action.meta.arg;
         state.error = null;
       })
 
       .addCase(setDefaultAddress.fulfilled, (state, action) => {
         state.updating = false;
+        state.updatingAddressId = null;
 
         state.addresses = state.addresses.map((address) => ({
           ...address,
@@ -144,9 +150,11 @@ const addressSlice = createSlice({
 
       .addCase(setDefaultAddress.rejected, (state, action) => {
         state.updating = false;
+        state.updatingAddressId = null;
         state.error = action.error.message;
       })
 
+      // Delete address
       .addCase(removeAddress.pending, (state) => {
         state.deleting = true;
         state.error = null;

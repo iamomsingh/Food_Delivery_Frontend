@@ -20,7 +20,11 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import AddressCard from "./AddressCard";
 import AddressForm from "./AddressForm";
-import { removeAddress } from "../../features/address/addressSlice";
+import {
+  fetchAddresses,
+  removeAddress,
+  setDefaultAddress,
+} from "../../features/address/addressSlice";
 
 function AddressSection({
   selectedAddressId,
@@ -28,7 +32,15 @@ function AddressSection({
   onAddressDeleted,
 }) {
   const dispatch = useDispatch();
-  const { addresses, loading, error } = useSelector((state) => state.address);
+  const {
+    addresses,
+    loading,
+    error,
+    updating,
+    deleting,
+    creating,
+    updatingAddressId,
+  } = useSelector((state) => state.address);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
@@ -65,10 +77,16 @@ function AddressSection({
 
     if (removeAddress.fulfilled.match(result)) {
       onAddressDeleted(deletingAddress.id);
-      // If the deleted address was selected,
-      // we'll handle selection below.
       setDeletingAddress(null);
     }
+
+    if (deletingAddress.isDefault) {
+      dispatch(fetchAddresses());
+    }
+  }
+
+  function handleMakeDefault(address) {
+    dispatch(setDefaultAddress(address.id));
   }
 
   return (
@@ -157,6 +175,8 @@ function AddressSection({
               onSelect={onSelectAddress}
               onEdit={handleEditAddress}
               onDelete={handleDeleteAddress}
+              onMakeDefault={handleMakeDefault}
+              updatingAddressId={updatingAddressId}
             />
           ))}
         </Stack>
@@ -278,9 +298,10 @@ function AddressSection({
           <Button
             color='error'
             variant='contained'
+            disabled={deleting}
             onClick={handleConfirmDelete}
           >
-            Delete
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogActions>
       </Dialog>

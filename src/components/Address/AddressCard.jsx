@@ -13,7 +13,17 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 
-function AddressCard({ address, selected, onSelect, onEdit, onDelete }) {
+function AddressCard({
+  address,
+  selected,
+  onSelect,
+  onEdit,
+  onDelete,
+  onMakeDefault,
+  updatingAddressId,
+}) {
+  const isUpdating = updatingAddressId === address.id;
+
   return (
     <Card
       elevation={0}
@@ -103,6 +113,19 @@ function AddressCard({ address, selected, onSelect, onEdit, onDelete }) {
               >
                 Delete
               </Button>
+
+              {!address.isDefault && (
+                <Button
+                  size='small'
+                  disabled={isUpdating}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onMakeDefault(address);
+                  }}
+                >
+                  {isUpdating ? "Processing..." : "Make Default"}
+                </Button>
+              )}
             </Stack>
           </Box>
         </Stack>
