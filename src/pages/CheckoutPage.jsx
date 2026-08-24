@@ -62,11 +62,8 @@ function CheckoutPage() {
     if (placeOrder.fulfilled.match(result)) {
       dispatch(clearCartState());
 
-      navigate("/order-confirmation", {
+      navigate(`/orders/${result.payload.id}`, {
         replace: true,
-        state: {
-          order: result.payload,
-        },
       });
     }
   }
