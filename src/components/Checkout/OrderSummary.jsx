@@ -27,8 +27,6 @@ function OrderSummary() {
         border: "1px solid",
         borderColor: "divider",
         borderRadius: 3,
-        position: "sticky",
-        top: 24,
       }}
     >
       <CardContent sx={{ p: 3 }}>

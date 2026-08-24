@@ -1,17 +1,32 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 import AddressSection from "../components/Address/AddressSection";
-
-import { fetchAddresses } from "../features/address/addressSlice";
 import OrderSummary from "../components/Checkout/OrderSummary";
 import PaymentSection from "../components/Checkout/PaymentSection";
 
+import { fetchAddresses } from "../features/address/addressSlice";
+import { placeOrder } from "../features/order/orderSlice";
+import { clearCartState } from "../features/cart/cartSlice";
+import { useNavigate } from "react-router-dom";
+
 function CheckoutPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { addresses } = useSelector((state) => state.address);
+  const { placing, error: orderError } = useSelector((state) => state.order);
+  const cart = useSelector((state) => state.cart.cart);
 
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
@@ -32,9 +47,29 @@ function CheckoutPage() {
     }
   }, [addresses, selectedAddressId]);
 
-  const selectedAddress = addresses.find(
-    (address) => address.id === selectedAddressId,
-  );
+  async function handlePlaceOrder() {
+    if (!selectedAddressId || !cart) {
+      return;
+    }
+
+    const result = await dispatch(
+      placeOrder({
+        deliveryAddressId: selectedAddressId,
+        paymentMethod,
+      }),
+    );
+
+    if (placeOrder.fulfilled.match(result)) {
+      dispatch(clearCartState());
+
+      navigate("/order-confirmation", {
+        replace: true,
+        state: {
+          order: result.payload,
+        },
+      });
+    }
+  }
 
   return (
     <Box component='main'>
@@ -64,7 +99,25 @@ function CheckoutPage() {
           </Grid>
 
           <Grid size={{ xs: 12, md: 5 }}>
-            <OrderSummary />
+            <Box sx={{ position: "sticky", top: 24 }}>
+              <Stack spacing={2}>
+                <OrderSummary />
+
+                {orderError && <Alert severity='error'>{orderError}</Alert>}
+
+                <Button
+                  variant='contained'
+                  size='large'
+                  fullWidth
+                  disabled={!selectedAddressId || !cart || placing}
+                  onClick={handlePlaceOrder}
+                >
+                  {placing
+                    ? "Placing Order..."
+                    : `Place Order • ₹${cart?.pricing?.totalAmount || 0}`}
+                </Button>
+              </Stack>
+            </Box>
           </Grid>
         </Grid>
       </Container>

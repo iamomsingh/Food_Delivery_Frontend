@@ -14,6 +14,7 @@ import OrdersPage from "../pages/OrdersPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage";
 import ProfilePage from "../pages/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
+import OrderConfirmationPage from "../pages/OrderConfirmationPage";
 
 function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ function AppRoutes() {
         />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
+        <Route path='/order-confirmation' element={<OrderConfirmationPage />} />
         <Route path='/orders' element={<OrdersPage />} />
         <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
         <Route path='/profile' element={<ProfilePage />} />
