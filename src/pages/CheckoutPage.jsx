@@ -6,12 +6,15 @@ import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import AddressSection from "../components/Address/AddressSection";
 
 import { fetchAddresses } from "../features/address/addressSlice";
+import OrderSummary from "../components/Checkout/OrderSummary";
+import PaymentSection from "../components/Checkout/PaymentSection";
 
 function CheckoutPage() {
   const dispatch = useDispatch();
   const { addresses } = useSelector((state) => state.address);
 
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   useEffect(() => {
     dispatch(fetchAddresses());
@@ -41,7 +44,7 @@ function CheckoutPage() {
         </Typography>
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Stack spacing={3}>
               <AddressSection
                 selectedAddressId={selectedAddressId}
@@ -53,16 +56,15 @@ function CheckoutPage() {
                 }}
               />
 
-              {/* PaymentSection will come here */}
+              <PaymentSection
+                paymentMethod={paymentMethod}
+                onPaymentMethodChange={setPaymentMethod}
+              />
             </Stack>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 6 }} sx={{ backgroundColor: "grey.100" }}>
-            <Typography>Restaurant order lies here</Typography>
-            <Typography>
-              Selected Address:{" "}
-              {selectedAddress ? JSON.stringify(selectedAddress) : "None"}
-            </Typography>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <OrderSummary />
           </Grid>
         </Grid>
       </Container>
