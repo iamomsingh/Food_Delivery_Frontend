@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,6 +11,10 @@ import {
   Chip,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Grid,
   Stack,
@@ -24,7 +28,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import RestaurantOutlinedIcon from "@mui/icons-material/RestaurantOutlined";
 
-import { fetchOrderById } from "../features/order/orderSlice";
+import { cancelOrder, fetchOrderById } from "../features/order/orderSlice";
 
 const ORDER_STATUSES = [
   "PLACED",
@@ -67,13 +71,35 @@ function OrderDetailsPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { currentOrder, loading, error } = useSelector((state) => state.order);
-
   useEffect(() => {
     if (orderId) {
       dispatch(fetchOrderById(orderId));
     }
   }, [dispatch, orderId]);
+
+  const { currentOrder, loading, error, cancelling, cancellingOrderId } =
+    useSelector((state) => state.order);
+
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+
+  function handleOpenCancelDialog() {
+    setIsCancelDialogOpen(true);
+  }
+
+  function handleCloseCancelDialog() {
+    if (!isCancelling) {
+      setIsCancelDialogOpen(false);
+    }
+  }
+
+  async function handleCancelOrder() {
+    const result = await dispatch(cancelOrder(order.id));
+
+    if (cancelOrder.fulfilled.match(result)) {
+      setIsCancelDialogOpen(false);
+      navigate("/orders");
+    }
+  }
 
   if (loading) {
     return (
@@ -111,8 +137,10 @@ function OrderDetailsPage() {
   }
 
   const order = currentOrder;
-
   const currentStatusIndex = ORDER_STATUSES.indexOf(order.status);
+
+  const canCancel = order.status === "PLACED" || order.status === "ACCEPTED";
+  const isCancelling = cancellingOrderId === order.id;
 
   return (
     <Box component='main' sx={{ pb: 6 }}>
@@ -416,46 +444,48 @@ function OrderDetailsPage() {
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
-                  <Stack
-                    direction='row'
-                    spacing={1.5}
-                    sx={{ alignItems: "flex-start" }}
-                  >
-                    <LocationOnOutlinedIcon color='primary' />
+                  {order.delivery && (
+                    <Stack
+                      direction='row'
+                      spacing={1.5}
+                      sx={{ alignItems: "flex-start" }}
+                    >
+                      <LocationOnOutlinedIcon color='primary' />
 
-                    <Box>
-                      <Typography variant='h6' fontWeight={700}>
-                        Delivery Address
-                      </Typography>
-
-                      <Typography sx={{ mt: 1 }} fontWeight={600}>
-                        {order.delivery.name}
-                      </Typography>
-
-                      <Typography
-                        variant='body2'
-                        color='text.secondary'
-                        sx={{ mt: 0.5 }}
-                      >
-                        {order.delivery.address}
-                      </Typography>
-
-                      {order.delivery.landmark && (
-                        <Typography variant='body2' color='text.secondary'>
-                          Near {order.delivery.landmark}
+                      <Box>
+                        <Typography variant='h6' fontWeight={700}>
+                          Delivery Address
                         </Typography>
-                      )}
 
-                      <Typography variant='body2' color='text.secondary'>
-                        {order.delivery.city}, {order.delivery.state} -{" "}
-                        {order.delivery.pincode}
-                      </Typography>
+                        <Typography sx={{ mt: 1 }} fontWeight={600}>
+                          {order.delivery.name}
+                        </Typography>
 
-                      <Typography variant='body2' color='text.secondary'>
-                        {order.delivery.country}
-                      </Typography>
-                    </Box>
-                  </Stack>
+                        <Typography
+                          variant='body2'
+                          color='text.secondary'
+                          sx={{ mt: 0.5 }}
+                        >
+                          {order.delivery.address}
+                        </Typography>
+
+                        {order.delivery.landmark && (
+                          <Typography variant='body2' color='text.secondary'>
+                            Near {order.delivery.landmark}
+                          </Typography>
+                        )}
+
+                        <Typography variant='body2' color='text.secondary'>
+                          {order.delivery.city}, {order.delivery.state} -{" "}
+                          {order.delivery.pincode}
+                        </Typography>
+
+                        <Typography variant='body2' color='text.secondary'>
+                          {order.delivery.country}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  )}
                 </CardContent>
               </Card>
 
@@ -487,13 +517,13 @@ function OrderDetailsPage() {
                         color='text.secondary'
                         sx={{ mt: 0.5 }}
                       >
-                        {order.pricing.paymentMethod === "COD"
+                        {order.pricing?.paymentMethod === "COD"
                           ? "Cash on Delivery"
-                          : order.pricing.paymentMethod}
+                          : order.pricing?.paymentMethod}
                       </Typography>
 
                       <Chip
-                        label={order.pricing.paymentStatus}
+                        label={order.pricing?.paymentStatus}
                         size='small'
                         sx={{ mt: 1 }}
                       />
@@ -512,74 +542,156 @@ function OrderDetailsPage() {
                   borderRadius: 3,
                 }}
               >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant='h6' fontWeight={700} sx={{ mb: 2.5 }}>
-                    Price Details
-                  </Typography>
+                {order.pricing && (
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant='h6' fontWeight={700} sx={{ mb: 2.5 }}>
+                      Price Details
+                    </Typography>
 
-                  <Stack spacing={1.25}>
-                    <Stack
-                      direction='row'
-                      sx={{ justifyContent: "space-between" }}
-                    >
-                      <Typography color='text.secondary'>Subtotal</Typography>
-
-                      <Typography>₹{order.pricing.subtotalAmount}</Typography>
-                    </Stack>
-
-                    <Stack
-                      direction='row'
-                      sx={{ justifyContent: "space-between" }}
-                    >
-                      <Typography color='text.secondary'>
-                        Delivery Fee
-                      </Typography>
-
-                      <Typography>₹{order.pricing.deliveryFee}</Typography>
-                    </Stack>
-
-                    <Stack
-                      direction='row'
-                      sx={{ justifyContent: "space-between" }}
-                    >
-                      <Typography color='text.secondary'>Tax</Typography>
-
-                      <Typography>₹{order.pricing.taxAmount}</Typography>
-                    </Stack>
-
-                    {Number(order.pricing.discountAmount) > 0 && (
+                    <Stack spacing={1.25}>
                       <Stack
                         direction='row'
                         sx={{ justifyContent: "space-between" }}
                       >
-                        <Typography color='success.main'>Discount</Typography>
+                        <Typography color='text.secondary'>Subtotal</Typography>
 
-                        <Typography color='success.main'>
-                          -₹{order.pricing.discountAmount}
-                        </Typography>
+                        <Typography>₹{order.pricing.subtotalAmount}</Typography>
                       </Stack>
-                    )}
-                  </Stack>
 
-                  <Divider sx={{ my: 2 }} />
+                      <Stack
+                        direction='row'
+                        sx={{ justifyContent: "space-between" }}
+                      >
+                        <Typography color='text.secondary'>
+                          Delivery Fee
+                        </Typography>
 
-                  <Stack
-                    direction='row'
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography variant='h6' fontWeight={700}>
-                      Total
-                    </Typography>
+                        <Typography>₹{order.pricing.deliveryFee}</Typography>
+                      </Stack>
 
-                    <Typography variant='h5' fontWeight={800}>
-                      ₹{order.pricing.totalAmount}
-                    </Typography>
-                  </Stack>
-                </CardContent>
+                      <Stack
+                        direction='row'
+                        sx={{ justifyContent: "space-between" }}
+                      >
+                        <Typography color='text.secondary'>Tax</Typography>
+
+                        <Typography>₹{order.pricing.taxAmount}</Typography>
+                      </Stack>
+
+                      {Number(order.pricing.discountAmount) > 0 && (
+                        <Stack
+                          direction='row'
+                          sx={{ justifyContent: "space-between" }}
+                        >
+                          <Typography color='success.main'>Discount</Typography>
+
+                          <Typography color='success.main'>
+                            -₹{order.pricing.discountAmount}
+                          </Typography>
+                        </Stack>
+                      )}
+                    </Stack>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Stack
+                      direction='row'
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant='h6' fontWeight={700}>
+                        Total
+                      </Typography>
+
+                      <Typography variant='h5' fontWeight={800}>
+                        ₹{order.pricing.totalAmount}
+                      </Typography>
+                    </Stack>
+                  </CardContent>
+                )}
               </Card>
+
+              {/* Order Action*/}
+
+              {canCancel && (
+                <Card
+                  elevation={0}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 3,
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant='h6' fontWeight={700} sx={{ mb: 1 }}>
+                      Order Actions
+                    </Typography>
+
+                    <Typography
+                      variant='body2'
+                      color='text.secondary'
+                      sx={{ mb: 2 }}
+                    >
+                      You can cancel this order while it is still being
+                      processed.
+                    </Typography>
+
+                    <Button
+                      fullWidth
+                      variant='outlined'
+                      color='error'
+                      onClick={handleOpenCancelDialog}
+                      disabled={isCancelling}
+                    >
+                      {isCancelling ? "Cancelling..." : "Cancel Order"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Dialog
+                open={isCancelDialogOpen}
+                onClose={handleCloseCancelDialog}
+                fullWidth
+                maxWidth='xs'
+              >
+                <DialogTitle fontWeight={700}>Cancel this order?</DialogTitle>
+
+                <DialogContent>
+                  <Typography color='text.secondary'>
+                    Are you sure you want to cancel order{" "}
+                    <strong>#{order.orderId}</strong>?
+                  </Typography>
+
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    sx={{ mt: 1 }}
+                  >
+                    This action cannot be undone.
+                  </Typography>
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                  <Button
+                    onClick={handleCloseCancelDialog}
+                    disabled={isCancelling}
+                  >
+                    Keep Order
+                  </Button>
+
+                  <Button
+                    variant='contained'
+                    color='error'
+                    onClick={handleCancelOrder}
+                    disabled={isCancelling}
+                  >
+                    {isCancelling ? "Cancelling..." : "Cancel Order"}
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </Stack>
           </Grid>
         </Grid>

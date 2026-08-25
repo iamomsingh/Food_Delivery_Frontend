@@ -10,7 +10,7 @@ import RestaurantListPage from "../pages/RestaurantListPage";
 import RestaurantDetailsPage from "../pages/RestaurantDetailsPage";
 import CartPage from "../pages/CartPage";
 import CheckoutPage from "../pages/CheckoutPage";
-import OrdersPage from "../pages/OrdersPage";
+import MyOrdersPage from "../pages/MyOrdersPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage";
 import ProfilePage from "../pages/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -29,7 +29,7 @@ function AppRoutes() {
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
         <Route path='/order-confirmation' element={<OrderConfirmationPage />} />
-        <Route path='/orders' element={<OrdersPage />} />
+        <Route path='/orders' element={<MyOrdersPage />} />
         <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
         <Route path='/profile' element={<ProfilePage />} />
       </Route>
