@@ -1,20 +1,19 @@
 import { Routes, Route } from "react-router-dom";
 
-import CustomerLayout from "../layouts/CustomerLayout";
-import AuthLayout from "../layouts/AuthLayout";
+import CustomerLayout from "../layouts/customer/CustomerLayout";
+import AuthLayout from "../layouts/auth/AuthLayout";
 
-import HomePage from "../pages/HomePage";
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
-import RestaurantListPage from "../pages/RestaurantListPage";
-import RestaurantDetailsPage from "../pages/RestaurantDetailsPage";
-import CartPage from "../pages/CartPage";
-import CheckoutPage from "../pages/CheckoutPage";
-import MyOrdersPage from "../pages/MyOrdersPage";
-import OrderDetailsPage from "../pages/OrderDetailsPage";
-import ProfilePage from "../pages/ProfilePage";
+import HomePage from "../pages/customer/HomePage";
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import RestaurantListPage from "../pages/customer/RestaurantListPage";
+import RestaurantDetailsPage from "../pages/customer/RestaurantDetailsPage";
+import CartPage from "../pages/customer/CartPage";
+import CheckoutPage from "../pages/customer/CheckoutPage";
+import MyOrdersPage from "../pages/customer/MyOrdersPage";
+import OrderDetailsPage from "../pages/customer/OrderDetailsPage";
+import ProfilePage from "../pages/customer/ProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
-import OrderConfirmationPage from "../pages/OrderConfirmationPage";
 
 function AppRoutes() {
   return (
@@ -28,7 +27,6 @@ function AppRoutes() {
         />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
-        <Route path='/order-confirmation' element={<OrderConfirmationPage />} />
         <Route path='/orders' element={<MyOrdersPage />} />
         <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
         <Route path='/profile' element={<ProfilePage />} />

@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { refresh, fetchCurrentUser, setAuthInitialized } from "./authSlice";
-import { fetchCart } from "../cart/cartSlice";
-import { fetchRestaurants } from "../restaurants/restaurantSlice";
+import { fetchCart } from "../customer/cartSlice";
+import { fetchRestaurants } from "../customer/restaurantSlice";
 
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();

@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import cartReducer from "../features/cart/cartSlice";
-import restaurantReducer from "../features/restaurants/restaurantSlice";
+import cartReducer from "../features/customer/cartSlice";
+import restaurantReducer from "../features/customer/restaurantSlice";
 import authReducer from "../features/auth/authSlice";
-import addressReducer from "../features/address/addressSlice";
-import orderReducer from "../features/order/orderSlice";
+import addressReducer from "../features/customer/addressSlice";
+import orderReducer from "../features/customer/orderSlice";
 
 export const store = configureStore({
   reducer: {
