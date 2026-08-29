@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { refresh, fetchCurrentUser, setAuthInitialized } from "./authSlice";
 import { fetchCart } from "../customer/cartSlice";
-import { fetchRestaurants } from "../customer/restaurantSlice";
 
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();
@@ -16,9 +15,15 @@ function AuthInitializer({ children }) {
         const result = await dispatch(refresh());
 
         if (refresh.fulfilled.match(result)) {
-          await dispatch(fetchCurrentUser());
-          await dispatch(fetchRestaurants());
-          await dispatch(fetchCart());
+          const userResult = await dispatch(fetchCurrentUser());
+
+          if (fetchCurrentUser.fulfilled.match(userResult)) {
+            const user = userResult.payload;
+
+            if (user.roles.includes("CUSTOMER")) {
+              await dispatch(fetchCart());
+            }
+          }
         }
       } finally {
         dispatch(setAuthInitialized());
