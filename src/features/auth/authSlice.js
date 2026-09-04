@@ -12,6 +12,8 @@ const initialState = {
   user: null,
   accessToken: null,
 
+  activeRole: null,
+
   loading: false,
   error: null,
 
@@ -77,6 +79,7 @@ const authSlice = createSlice({
     clearAuth(state) {
       state.user = null;
       state.accessToken = null;
+      state.activeRole = null;
       state.isAuthenticated = false;
       state.error = null;
     },
@@ -85,8 +88,13 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
     },
 
+    setActiveRole(state, action) {
+      state.activeRole = action.payload;
+    },
+
     setAuthInitialized(state) {
       state.authInitialized = true;
+      state.isAuthenticated = true;
     },
   },
 
@@ -104,6 +112,10 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
+
+        const roles = action.payload.user.roles;
+
+        state.activeRole = roles.includes("CUSTOMER") ? "CUSTOMER" : roles[0];
       })
 
       .addCase(login.rejected, (state, action) => {
@@ -151,19 +163,22 @@ const authSlice = createSlice({
     builder.addCase(fetchCurrentUser.fulfilled, (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+      const roles = action.payload.roles;
+      state.activeRole = roles.includes("CUSTOMER") ? "CUSTOMER" : roles[0];
     });
 
     // Logout
     builder.addCase(logout.fulfilled, (state) => {
       state.user = null;
       state.accessToken = null;
+      state.activeRole = null;
       state.isAuthenticated = false;
       state.error = null;
     });
   },
 });
 
-export const { clearAuth, setAccessToken, setAuthInitialized } =
+export const { clearAuth, setAccessToken, setAuthInitialized, setActiveRole } =
   authSlice.actions;
 
 export default authSlice.reducer;

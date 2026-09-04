@@ -2,13 +2,13 @@ import { Outlet } from "react-router-dom";
 
 import { Box, Container } from "@mui/material";
 
-import Navbar from "../../components/customer/Navbar";
-import Footer from "../../components/customer/Footer";
+import CustomerNavbar from "../../components/customer/CustomerNavbar";
+import Footer from "../../components/common/Footer";
 
 function CustomerLayout() {
   return (
     <>
-      <Navbar />
+      <CustomerNavbar />
 
       <Container maxWidth='xl'>
         <Box

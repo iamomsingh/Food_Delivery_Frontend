@@ -4,8 +4,8 @@ import { Outlet } from "react-router-dom";
 
 import { Box, Container } from "@mui/material";
 
-import Navbar from "../../components/customer/Navbar";
-import Footer from "../../components/customer/Footer";
+import RoleBasedNavbar from "../../components/common/RoleBasedNavbar";
+import Footer from "../../components/common/Footer";
 
 import { fetchRestaurants } from "../../features/customer/restaurantSlice";
 
@@ -18,7 +18,7 @@ function PublicLayout() {
 
   return (
     <>
-      <Navbar />
+      <RoleBasedNavbar />
 
       <Container maxWidth='xl'>
         <Box

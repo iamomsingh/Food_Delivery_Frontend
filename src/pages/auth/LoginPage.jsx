@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { login } from "../../features/auth/authSlice";
+import { fetchCart } from "../../features/customer/cartSlice";
 
 function LoginPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  const { loading, error } = useSelector((state) => state.auth);
 
   // Handle change
   function handleChange(event) {
@@ -31,7 +33,8 @@ function LoginPage() {
     const result = await dispatch(login(formData));
 
     if (login.fulfilled.match(result)) {
-      Navigate("/register");
+      await dispatch(fetchCart());
+      navigate("/");
     }
   }
 

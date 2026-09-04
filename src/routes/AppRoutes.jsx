@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 // Routes
 import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
 
 // Layouts
 import PublicLayout from "../layouts/public/PublicLayout";
@@ -24,23 +25,12 @@ import ProfilePage from "../pages/customer/ProfilePage";
 
 // Global Pages
 import NotFoundPage from "../pages/NotFoundPage";
-import RoleRoute from "./RoleRoute";
 
 import { ROLES } from "../constants/roles";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Route*/}
-      <Route element={<PublicLayout />}>
-        <Route path='/' element={<HomePage />} />
-        <Route path='/restaurants' element={<RestaurantListPage />} />
-        <Route
-          path='/restaurants/:restaurantId'
-          element={<RestaurantDetailsPage />}
-        />
-      </Route>
-
       {/* Auth Route*/}
       <Route element={<AuthLayout />}>
         <Route path='/login' element={<LoginPage />} />
@@ -49,7 +39,7 @@ function AppRoutes() {
 
       {/* Customer Route   */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<RoleRoute allowedRoles={[ROLES.RESTAURANT_OWNER]} />}>
+        <Route element={<RoleRoute allowedRoles={[ROLES.CUSTOMER]} />}>
           <Route element={<CustomerLayout />}>
             <Route path='/cart' element={<CartPage />} />
             <Route path='/checkout' element={<CheckoutPage />} />
@@ -58,6 +48,16 @@ function AppRoutes() {
             <Route path='/profile' element={<ProfilePage />} />
           </Route>
         </Route>
+      </Route>
+
+      {/* Public Route*/}
+      <Route element={<PublicLayout />}>
+        <Route path='/' element={<HomePage />} />
+        <Route path='/restaurants' element={<RestaurantListPage />} />
+        <Route
+          path='/restaurants/:restaurantId'
+          element={<RestaurantDetailsPage />}
+        />
       </Route>
 
       <Route path='*' element={<NotFoundPage />} />
