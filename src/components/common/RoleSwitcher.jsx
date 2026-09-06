@@ -4,28 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 import { setActiveRole } from "../../features/auth/authSlice";
-
-const ROLE_CONFIG = {
-  CUSTOMER: {
-    label: "Customer",
-    path: "/",
-  },
-
-  RESTAURANT_OWNER: {
-    label: "Restaurant",
-    path: "/restaurant",
-  },
-
-  DELIVERY: {
-    label: "Delivery",
-    path: "/delivery",
-  },
-
-  ADMIN: {
-    label: "Admin",
-    path: "/admin",
-  },
-};
+import { ROLE_CONFIG } from "../../constants/roleRoutes";
 
 function RoleSwitcher() {
   const dispatch = useDispatch();

@@ -1,8 +1,14 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { refresh, fetchCurrentUser, setAuthInitialized } from "./authSlice";
+import {
+  refresh,
+  fetchCurrentUser,
+  setAuthInitialized,
+  setActiveRole,
+} from "./authSlice";
 import { fetchCart } from "../customer/cartSlice";
+import { getDefaultRole } from "../../utils/roleUtils";
 
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();
@@ -19,6 +25,9 @@ function AuthInitializer({ children }) {
 
           if (fetchCurrentUser.fulfilled.match(userResult)) {
             const user = userResult.payload;
+            const defaultRole = getDefaultRole(user.roles);
+
+            dispatch(setActiveRole(defaultRole));
 
             if (user.roles.includes("CUSTOMER")) {
               await dispatch(fetchCart());
@@ -41,4 +50,3 @@ function AuthInitializer({ children }) {
 }
 
 export default AuthInitializer;
-  

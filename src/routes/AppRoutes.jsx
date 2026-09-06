@@ -8,6 +8,9 @@ import RoleRoute from "./RoleRoute";
 import PublicLayout from "../layouts/public/PublicLayout";
 import CustomerLayout from "../layouts/customer/CustomerLayout";
 import AuthLayout from "../layouts/auth/AuthLayout";
+import RestaurantLayout from "../layouts/restaurant/RestaurantLayout";
+import DeliveryLayout from "../layouts/delivery/DeliveryLayout";
+import AdminLayout from "../layouts/admin/AdminLayout";
 
 //Auth Pages
 import LoginPage from "../pages/auth/LoginPage";
@@ -23,6 +26,15 @@ import MyOrdersPage from "../pages/customer/MyOrdersPage";
 import OrderDetailsPage from "../pages/customer/OrderDetailsPage";
 import ProfilePage from "../pages/customer/ProfilePage";
 
+// Restaurant Pages
+import RestaurantDashboardPage from "../pages/restaurant/RestaurantDashboardPage";
+
+// Admin Pages
+import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
+
+// Delivery-Partner Pages
+import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
+
 // Global Pages
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -37,8 +49,9 @@ function AppRoutes() {
         <Route path='/register' element={<RegisterPage />} />
       </Route>
 
-      {/* Customer Route   */}
+      {/* PROTECTED Route   */}
       <Route element={<ProtectedRoute />}>
+        {/* Customer Route */}
         <Route element={<RoleRoute allowedRoles={[ROLES.CUSTOMER]} />}>
           <Route element={<CustomerLayout />}>
             <Route path='/cart' element={<CartPage />} />
@@ -46,6 +59,27 @@ function AppRoutes() {
             <Route path='/orders' element={<MyOrdersPage />} />
             <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
             <Route path='/profile' element={<ProfilePage />} />
+          </Route>
+        </Route>
+
+        {/* Restaurant_Owner Route*/}
+        <Route element={<RoleRoute allowedRoles={[ROLES.RESTAURANT_OWNER]} />}>
+          <Route element={<RestaurantLayout />}>
+            <Route path='/restaurant' element={<RestaurantDashboardPage />} />
+          </Route>
+        </Route>
+
+        {/* Delivery Route*/}
+        <Route element={<RoleRoute allowedRoles={[ROLES.DELIVERY]} />}>
+          <Route element={<DeliveryLayout />}>
+            <Route path='/delivery' element={<DeliveryDashboardPage />} />
+          </Route>
+        </Route>
+
+        {/* Admin Route   */}
+        <Route element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}>
+          <Route element={<AdminLayout />}>
+            <Route path='/admin' element={<AdminDashboardPage />} />
           </Route>
         </Route>
       </Route>

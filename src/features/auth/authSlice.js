@@ -163,8 +163,6 @@ const authSlice = createSlice({
     builder.addCase(fetchCurrentUser.fulfilled, (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
-      const roles = action.payload.roles;
-      state.activeRole = roles.includes("CUSTOMER") ? "CUSTOMER" : roles[0];
     });
 
     // Logout
