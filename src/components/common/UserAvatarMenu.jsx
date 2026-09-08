@@ -109,7 +109,7 @@ function UserAvatarMenu() {
           <ListItemIcon>
             <AccountCircle fontSize='small' />
           </ListItemIcon>
-          Profile
+          My Profile
         </MenuItem>
 
         {/* Orders */}
@@ -125,7 +125,7 @@ function UserAvatarMenu() {
           <ListItemIcon>
             <LocationOn fontSize='small' />
           </ListItemIcon>
-          Addresses
+          My Addresses
         </MenuItem>
 
         <Divider />

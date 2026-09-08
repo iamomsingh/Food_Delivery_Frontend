@@ -6,10 +6,19 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import AppLogo from "../common/AppLogo";
 import RoleSwitcher from "../common/RoleSwitcher";
-import UserAvatar from "../common/UserAvatar";
+import UserAvatarMenu from "../common/UserAvatarMenu";
+import RestaurantSelector from "./RestaurantSelector";
 
 function RestaurantOwnerNavbar({ onMenuClick }) {
   const { user } = useSelector((state) => state.auth);
+
+  const { restaurants, activeRestaurantId } = useSelector(
+    (state) => state.restaurantOwner,
+  );
+
+  const activeRestaurant = restaurants.find(
+    (restaurant) => restaurant.id === activeRestaurantId,
+  );
 
   return (
     <AppBar
@@ -57,11 +66,11 @@ function RestaurantOwnerNavbar({ onMenuClick }) {
           }}
         >
           <Typography variant='subtitle1' fontWeight={600}>
-            Restaurant Dashboard
+            {activeRestaurant?.name || "Restaurant Dashboard"}
           </Typography>
 
           <Typography variant='caption' color='text.secondary'>
-            {user?.firstName} {user?.lastName}
+            {activeRestaurant?.status || "No restaurant selected"}
           </Typography>
         </Box>
 
@@ -76,6 +85,10 @@ function RestaurantOwnerNavbar({ onMenuClick }) {
             },
           }}
         >
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            <RestaurantSelector />
+          </Box>
+
           <Box
             sx={{
               display: {
@@ -87,7 +100,7 @@ function RestaurantOwnerNavbar({ onMenuClick }) {
             <RoleSwitcher />
           </Box>
 
-          <UserAvatar user={user} />
+          <UserAvatarMenu />
         </Box>
       </Toolbar>
     </AppBar>

@@ -9,12 +9,16 @@ import {
 
 import {
   Box,
+  Divider,
   Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+
+import RoleSwitcher from "../common/RoleSwitcher";
+import RestaurantOwnerAccount from "./RestaurantOwnerAccount";
 
 const DRAWER_WIDTH = 240;
 
@@ -44,40 +48,69 @@ const NAV_ITEMS = [
 
 function RestaurantOwnerSidebar({ mobileOpen, onMobileClose }) {
   const navigation = (
-    <List sx={{ p: 2 }}>
-      {NAV_ITEMS.map((item) => (
-        <ListItemButton
-          key={item.path}
-          component={NavLink}
-          to={item.path}
-          end={item.end}
-          onClick={onMobileClose}
-          sx={{
-            mb: 0.5,
-            borderRadius: 2,
-
-            "&.active": {
-              bgcolor: "action.selected",
-              color: "primary.main",
-
-              "& .MuiListItemIcon-root": {
-                color: "primary.main",
-              },
-            },
-          }}
-        >
-          <ListItemIcon
+    <>
+      <List sx={{ p: 2 }}>
+        {NAV_ITEMS.map((item) => (
+          <ListItemButton
+            key={item.path}
+            component={NavLink}
+            to={item.path}
+            end={item.end}
+            onClick={onMobileClose}
             sx={{
-              minWidth: 40,
+              mb: 0.5,
+              borderRadius: 2,
+
+              "&.active": {
+                bgcolor: "action.selected",
+                color: "primary.main",
+
+                "& .MuiListItemIcon-root": {
+                  color: "primary.main",
+                },
+              },
             }}
           >
-            {item.icon}
-          </ListItemIcon>
+            <ListItemIcon
+              sx={{
+                minWidth: 40,
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
 
-          <ListItemText primary={item.label} />
-        </ListItemButton>
-      ))}
-    </List>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
+
+      <Divider />
+
+      {/* Mobile role switcher */}
+      <Box
+        sx={{
+          display: {
+            xs: "block",
+            md: "none",
+          },
+          p: 2,
+        }}
+      >
+        <RoleSwitcher />
+      </Box>
+
+      {/* Mobile account */}
+      <Box
+        sx={{
+          display: {
+            xs: "block",
+            md: "none",
+          },
+        }}
+      >
+        <RestaurantOwnerAccount />
+      </Box>
+    </>
   );
 
   return (

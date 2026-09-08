@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
 
 import { Box } from "@mui/material";
@@ -6,8 +7,16 @@ import { Box } from "@mui/material";
 import RestaurantOwnerNavbar from "../../components/restaurant/RestaurantOwnerNavbar";
 import RestaurantOwnerSidebar from "../../components/restaurant/RestaurantOwnerSidebar";
 
+import { fetchOwnerRestaurants } from "../../features/restaurant/restaurantOwnerSlice";
+
 function RestaurantLayout() {
+  const dispatch = useDispatch();
+
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchOwnerRestaurants());
+  });
 
   const handleMobileMenuOpen = () => {
     setMobileOpen(true);
