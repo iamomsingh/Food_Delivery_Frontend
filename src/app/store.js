@@ -6,6 +6,7 @@ import authReducer from "../features/auth/authSlice";
 import addressReducer from "../features/customer/addressSlice";
 import orderReducer from "../features/customer/orderSlice";
 import restaurantOwnerReducer from "../features/restaurant/restaurantOwnerSlice";
+import restaurantOwnerOrderReducer from "../features/restaurant/restaurantOwnerOrderSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,5 +16,6 @@ export const store = configureStore({
     address: addressReducer,
     order: orderReducer,
     restaurantOwner: restaurantOwnerReducer,
+    restaurantOwnerOrder: restaurantOwnerOrderReducer,
   },
 });

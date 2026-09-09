@@ -28,6 +28,7 @@ import ProfilePage from "../pages/customer/ProfilePage";
 
 // Restaurant Pages
 import RestaurantDashboardPage from "../pages/restaurant/RestaurantDashboardPage";
+import RestaurantOrdersPage from "../pages/restaurant/RestaurantOrdersPage";
 
 // Admin Pages
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -39,6 +40,7 @@ import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
+import RestaurantOrderDetailsPage from "../pages/restaurant/RestaurantOrderDetailsPage";
 
 function AppRoutes() {
   return (
@@ -66,6 +68,14 @@ function AppRoutes() {
         <Route element={<RoleRoute allowedRoles={[ROLES.RESTAURANT_OWNER]} />}>
           <Route element={<RestaurantLayout />}>
             <Route path='/restaurant' element={<RestaurantDashboardPage />} />
+            <Route
+              path='/restaurant/orders'
+              element={<RestaurantOrdersPage />}
+            />
+            <Route
+              path='/restaurant/orders/:orderId'
+              element={<RestaurantOrderDetailsPage />}
+            />
           </Route>
         </Route>
 
