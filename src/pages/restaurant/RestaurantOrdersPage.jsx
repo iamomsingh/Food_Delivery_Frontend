@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 
 import { fetchRestaurantOrders } from "../../features/restaurant/restaurantOwnerOrderSlice";
+import RestaurantOrderActions from "../../components/restaurant/RestaurantOrderActions";
 
 function RestaurantOrdersPage() {
   const dispatch = useDispatch();
@@ -105,6 +106,10 @@ function RestaurantOrdersPage() {
                   <TableCell>
                     <strong>Placed</strong>
                   </TableCell>
+
+                  <TableCell>
+                    <strong>Actions</strong>
+                  </TableCell>
                 </TableRow>
               </TableHead>
 
@@ -137,6 +142,10 @@ function RestaurantOrdersPage() {
                     </TableCell>
 
                     <TableCell>{formatDate(order.placedAt)}</TableCell>
+
+                    <TableCell onClick={(event) => event.stopPropagation()}>
+                      <RestaurantOrderActions order={order} variant='table' />
+                    </TableCell>
                   </TableRow>
                 ))}
 

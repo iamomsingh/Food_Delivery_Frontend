@@ -13,3 +13,35 @@ export async function getRestaurantOrder(restaurantId, orderId) {
 
   return response.data.data;
 }
+
+export async function acceptRestaurantOrder(restaurantId, orderId) {
+  const response = await api.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/accept`,
+  );
+
+  return response.data.data;
+}
+
+export async function rejectRestaurantOrder(restaurantId, orderId) {
+  const response = await api.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/reject`,
+  );
+
+  return response.data.data;
+}
+
+export async function markRestaurantOrderPreparing(restaurantId, orderId) {
+  const response = await api.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/preparing`,
+  );
+
+  return response.data.data;
+}
+
+export async function markRestaurantOrderReadyForPickup(restaurantId, orderId) {
+  const response = await api.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/ready-for-pickup`,
+  );
+
+  return response.data.data;
+}

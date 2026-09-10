@@ -10,6 +10,7 @@ import {
   clearSelectedOrder,
   fetchRestaurantOrder,
 } from "../../features/restaurant/restaurantOwnerOrderSlice";
+import RestaurantOrderActions from "../../components/restaurant/RestaurantOrderActions";
 
 function RestaurantOrderDetailsPage() {
   const dispatch = useDispatch();
@@ -95,6 +96,8 @@ function RestaurantOrderDetailsPage() {
 
         <Chip label={order.status} variant='outlined' />
       </Box>
+
+      <RestaurantOrderActions order={order} />
 
       <Paper variant='outlined' sx={{ p: 3, mb: 3 }}>
         <Typography variant='h6' fontWeight={600}>

@@ -1,8 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
+  acceptRestaurantOrder,
   getRestaurantOrder,
   getRestaurantOrders,
+  markRestaurantOrderPreparing,
+  markRestaurantOrderReadyForPickup,
+  rejectRestaurantOrder,
 } from "../../services/api/restaurantOwnerOrderApi";
 
 const initialState = {
@@ -14,10 +18,16 @@ const initialState = {
     total: 0,
     totalPages: 0,
   },
+
   loading: false,
   detailLoading: false,
+
+  actionLoadingOrderId: null,
+
   error: null,
   detailError: null,
+  actionError: null,
+  actionErrorOrderId: null,
 };
 
 export const fetchRestaurantOrders = createAsyncThunk(
@@ -48,6 +58,70 @@ export const fetchRestaurantOrder = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch order",
+      );
+    }
+  },
+);
+
+export const acceptOrder = createAsyncThunk(
+  "restaurantOwnerOrder/acceptOrder",
+  async ({ restaurantId, orderId }, { rejectWithValue }) => {
+    try {
+      const data = await acceptRestaurantOrder(restaurantId, orderId);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to accept order",
+      );
+    }
+  },
+);
+
+export const rejectOrder = createAsyncThunk(
+  "restaurantOwnerOrder/rejectOrder",
+  async ({ restaurantId, orderId }, { rejectWithValue }) => {
+    try {
+      const data = await rejectRestaurantOrder(restaurantId, orderId);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reject order",
+      );
+    }
+  },
+);
+
+export const markOrderPreparing = createAsyncThunk(
+  "restaurantOwnerOrder/markOrderPreparing",
+  async ({ restaurantId, orderId }, { rejectWithValue }) => {
+    try {
+      const data = await markRestaurantOrderPreparing(restaurantId, orderId);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to mark order as preparing",
+      );
+    }
+  },
+);
+
+export const markOrderReadyForPickup = createAsyncThunk(
+  "restaurantOwnerOrder/markOrderReadyForPickup",
+  async ({ restaurantId, orderId }, { rejectWithValue }) => {
+    try {
+      const data = await markRestaurantOrderReadyForPickup(
+        restaurantId,
+        orderId,
+      );
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to mark order as ready for pickup",
       );
     }
   },
@@ -108,6 +182,126 @@ const restaurantOwnerOrderSlice = createSlice({
       .addCase(fetchRestaurantOrder.rejected, (state, action) => {
         state.detailLoading = false;
         state.detailError = action.payload;
+      })
+
+      .addCase(acceptOrder.pending, (state, action) => {
+        state.actionLoadingOrderId = action.meta.arg.orderId;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+      })
+
+      .addCase(acceptOrder.fulfilled, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+
+        if (state.selectedOrder?.order) {
+          state.selectedOrder.order.status = action.payload.status;
+        }
+
+        const order = state.orders.find(
+          (order) => order.id === action.payload.id,
+        );
+
+        if (order) {
+          order.status = action.payload.status;
+        }
+      })
+
+      .addCase(acceptOrder.rejected, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = action.payload;
+        state.actionErrorOrderId = action.meta.arg.orderId;
+      })
+
+      .addCase(rejectOrder.pending, (state, action) => {
+        state.actionLoadingOrderId = action.meta.arg.orderId;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+      })
+
+      .addCase(rejectOrder.fulfilled, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+
+        if (state.selectedOrder?.order) {
+          state.selectedOrder.order.status = action.payload.status;
+        }
+
+        const order = state.orders.find(
+          (order) => order.id === action.payload.id,
+        );
+
+        if (order) {
+          order.status = action.payload.status;
+        }
+      })
+
+      .addCase(rejectOrder.rejected, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = action.payload;
+        state.actionErrorOrderId = action.meta.arg.orderId;
+      })
+
+      .addCase(markOrderPreparing.pending, (state, action) => {
+        state.actionLoadingOrderId = action.meta.arg.orderId;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+      })
+
+      .addCase(markOrderPreparing.fulfilled, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+
+        if (state.selectedOrder?.order) {
+          state.selectedOrder.order.status = action.payload.status;
+        }
+
+        const order = state.orders.find(
+          (order) => order.id === action.payload.id,
+        );
+
+        if (order) {
+          order.status = action.payload.status;
+        }
+      })
+
+      .addCase(markOrderPreparing.rejected, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = action.payload;
+        state.actionErrorOrderId = action.meta.arg.orderId;
+      })
+
+      .addCase(markOrderReadyForPickup.pending, (state, action) => {
+        state.actionLoadingOrderId = action.meta.arg.orderId;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+      })
+
+      .addCase(markOrderReadyForPickup.fulfilled, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+
+        if (state.selectedOrder?.order) {
+          state.selectedOrder.order.status = action.payload.status;
+        }
+
+        const order = state.orders.find(
+          (order) => order.id === action.payload.id,
+        );
+
+        if (order) {
+          order.status = action.payload.status;
+        }
+      })
+
+      .addCase(markOrderReadyForPickup.rejected, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = action.payload;
+        state.actionErrorOrderId = action.meta.arg.orderId;
       });
   },
 });
