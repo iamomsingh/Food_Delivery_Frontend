@@ -29,6 +29,8 @@ import ProfilePage from "../pages/customer/ProfilePage";
 // Restaurant Pages
 import RestaurantDashboardPage from "../pages/restaurant/RestaurantDashboardPage";
 import RestaurantOrdersPage from "../pages/restaurant/RestaurantOrdersPage";
+import RestaurantOrderDetailsPage from "../pages/restaurant/RestaurantOrderDetailsPage";
+import RestaurantMenuPage from "../pages/restaurant/RestaurantMenuPage";
 
 // Admin Pages
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -40,7 +42,6 @@ import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
-import RestaurantOrderDetailsPage from "../pages/restaurant/RestaurantOrderDetailsPage";
 
 function AppRoutes() {
   return (
@@ -76,6 +77,7 @@ function AppRoutes() {
               path='/restaurant/orders/:orderId'
               element={<RestaurantOrderDetailsPage />}
             />
+            <Route path='/restaurant/menu' element={<RestaurantMenuPage />} />
           </Route>
         </Route>
 
