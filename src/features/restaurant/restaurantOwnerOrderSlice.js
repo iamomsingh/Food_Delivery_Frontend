@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
   acceptRestaurantOrder,
+  assignRestaurantDeliveryPartner,
   getRestaurantOrder,
   getRestaurantOrders,
   markRestaurantOrderPreparing,
@@ -122,6 +123,25 @@ export const markOrderReadyForPickup = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message ||
           "Failed to mark order as ready for pickup",
+      );
+    }
+  },
+);
+
+export const assignDeliveryPartner = createAsyncThunk(
+  "restaurantOwnerOrder/assignDeliveryPartner",
+  async ({ restaurantId, orderId, deliveryPartnerId }, { rejectWithValue }) => {
+    try {
+      const data = await assignRestaurantDeliveryPartner(
+        restaurantId,
+        orderId,
+        deliveryPartnerId,
+      );
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to assign delivery partner",
       );
     }
   },
@@ -299,6 +319,48 @@ const restaurantOwnerOrderSlice = createSlice({
       })
 
       .addCase(markOrderReadyForPickup.rejected, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = action.payload;
+        state.actionErrorOrderId = action.meta.arg.orderId;
+      })
+
+      .addCase(assignDeliveryPartner.pending, (state, action) => {
+        state.actionLoadingOrderId = action.meta.arg.orderId;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+      })
+
+      .addCase(assignDeliveryPartner.fulfilled, (state, action) => {
+        state.actionLoadingOrderId = null;
+        state.actionError = null;
+        state.actionErrorOrderId = null;
+
+        const updatedOrder = action.payload;
+
+        if (state.selectedOrder?.order) {
+          state.selectedOrder.order.status = updatedOrder.status;
+
+          if (updatedOrder.deliveryPartnerId) {
+            state.selectedOrder.order.assignedDeliveryPartnerId =
+              updatedOrder.deliveryPartnerId;
+          }
+        }
+
+        const existingOrder = state.orders.find(
+          (order) => order.id === updatedOrder.id,
+        );
+
+        if (existingOrder) {
+          existingOrder.status = updatedOrder.status;
+
+          if (updatedOrder.deliveryPartnerId) {
+            existingOrder.assignedDeliveryPartnerId =
+              updatedOrder.deliveryPartnerId;
+          }
+        }
+      })
+
+      .addCase(assignDeliveryPartner.rejected, (state, action) => {
         state.actionLoadingOrderId = null;
         state.actionError = action.payload;
         state.actionErrorOrderId = action.meta.arg.orderId;

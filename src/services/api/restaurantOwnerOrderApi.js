@@ -45,3 +45,18 @@ export async function markRestaurantOrderReadyForPickup(restaurantId, orderId) {
 
   return response.data.data;
 }
+
+export async function assignRestaurantDeliveryPartner(
+  restaurantId,
+  orderId,
+  deliveryPartnerId,
+) {
+  const response = await api.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/assign-delivery-partner`,
+    {
+      deliveryPartnerId,
+    },
+  );
+
+  return response.data.data;
+}
