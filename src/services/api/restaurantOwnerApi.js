@@ -5,3 +5,15 @@ export async function getOwnerRestaurants() {
 
   return response.data.data;
 }
+
+export async function updateOwnerRestaurant(restaurantId, data) {
+  const response = await api.patch(`/restaurants/${restaurantId}`, data);
+
+  return response.data.data;
+}
+
+export async function deleteOwnerRestaurant(restaurantId) {
+  const response = await api.delete(`/restaurants/${restaurantId}`);
+
+  return response.data;
+}

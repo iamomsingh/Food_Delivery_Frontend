@@ -31,6 +31,7 @@ import RestaurantDashboardPage from "../pages/restaurant/RestaurantDashboardPage
 import RestaurantOrdersPage from "../pages/restaurant/RestaurantOrdersPage";
 import RestaurantOrderDetailsPage from "../pages/restaurant/RestaurantOrderDetailsPage";
 import RestaurantMenuPage from "../pages/restaurant/RestaurantMenuPage";
+import RestaurantManagementPage from "../pages/restaurant/RestaurantManagementPage";
 
 // Admin Pages
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -78,6 +79,10 @@ function AppRoutes() {
               element={<RestaurantOrderDetailsPage />}
             />
             <Route path='/restaurant/menu' element={<RestaurantMenuPage />} />
+            <Route
+              path='/restaurant/management'
+              element={<RestaurantManagementPage />}
+            />
           </Route>
         </Route>
 

@@ -41,7 +41,7 @@ const NAV_ITEMS = [
   },
   {
     label: "Restaurant",
-    path: "/restaurant/restaurant",
+    path: "/restaurant/management",
     icon: <StorefrontOutlined />,
   },
 ];
