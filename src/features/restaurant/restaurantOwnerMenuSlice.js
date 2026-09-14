@@ -16,7 +16,8 @@ const initialState = {
   menuItems: [],
 
   loading: false,
-  actionLoading: false,
+  actionLoadingType: null,
+  actionLoadingId: null,
 
   error: null,
   actionError: null,
@@ -194,17 +195,20 @@ const restaurantOwnerMenuSlice = createSlice({
       // =========================
 
       .addCase(addRestaurantMenu.pending, (state) => {
-        state.actionLoading = true;
+        state.actionLoadingType = "CREATE_MENU";
+        state.actionLoadingId = null;
         state.actionError = null;
       })
 
       .addCase(addRestaurantMenu.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.menus.push(action.payload);
       })
 
       .addCase(addRestaurantMenu.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       })
 
@@ -212,13 +216,15 @@ const restaurantOwnerMenuSlice = createSlice({
       // UPDATE MENU
       // =========================
 
-      .addCase(editRestaurantMenu.pending, (state) => {
-        state.actionLoading = true;
+      .addCase(editRestaurantMenu.pending, (state, action) => {
+        state.actionLoadingType = "UPDATE_MENU";
+        state.actionLoadingId = action.meta.arg.menuId;
         state.actionError = null;
       })
 
       .addCase(editRestaurantMenu.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
 
         const index = state.menus.findIndex(
           (menu) => menu.id === action.payload.id,
@@ -230,7 +236,8 @@ const restaurantOwnerMenuSlice = createSlice({
       })
 
       .addCase(editRestaurantMenu.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       })
 
@@ -238,13 +245,15 @@ const restaurantOwnerMenuSlice = createSlice({
       // DELETE MENU
       // =========================
 
-      .addCase(removeRestaurantMenu.pending, (state) => {
-        state.actionLoading = true;
+      .addCase(removeRestaurantMenu.pending, (state, action) => {
+        state.actionLoadingType = "DELETE_MENU";
+        state.actionLoadingId = action.meta.arg;
         state.actionError = null;
       })
 
       .addCase(removeRestaurantMenu.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
 
         state.menus = state.menus.filter((menu) => menu.id !== action.payload);
 
@@ -254,7 +263,8 @@ const restaurantOwnerMenuSlice = createSlice({
       })
 
       .addCase(removeRestaurantMenu.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       })
 
@@ -263,12 +273,14 @@ const restaurantOwnerMenuSlice = createSlice({
       // =========================
 
       .addCase(addMenuItem.pending, (state) => {
-        state.actionLoading = true;
+        state.actionLoadingType = "CREATE_MENU_ITEM";
+        state.actionLoadingId = null;
         state.actionError = null;
       })
 
       .addCase(addMenuItem.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
 
         const menuGroup = state.menuItems.find(
           (group) => group.menuId === action.payload.menuId,
@@ -280,7 +292,8 @@ const restaurantOwnerMenuSlice = createSlice({
       })
 
       .addCase(addMenuItem.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       })
 
@@ -288,13 +301,15 @@ const restaurantOwnerMenuSlice = createSlice({
       // UPDATE MENU ITEM
       // =========================
 
-      .addCase(editMenuItem.pending, (state) => {
-        state.actionLoading = true;
+      .addCase(editMenuItem.pending, (state, action) => {
+        state.actionLoadingType = "UPDATE_MENU_ITEM";
+        state.actionLoadingId = action.meta.arg.itemId;
         state.actionError = null;
       })
 
       .addCase(editMenuItem.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
 
         for (const group of state.menuItems) {
           const index = group.items.findIndex(
@@ -309,7 +324,8 @@ const restaurantOwnerMenuSlice = createSlice({
       })
 
       .addCase(editMenuItem.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       })
 
@@ -317,13 +333,15 @@ const restaurantOwnerMenuSlice = createSlice({
       // DELETE MENU ITEM
       // =========================
 
-      .addCase(removeMenuItem.pending, (state) => {
-        state.actionLoading = true;
+      .addCase(removeMenuItem.pending, (state, action) => {
+        state.actionLoadingType = "DELETE_MENU_ITEM";
+        state.actionLoadingId = action.meta.arg;
         state.actionError = null;
       })
 
       .addCase(removeMenuItem.fulfilled, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
 
         for (const group of state.menuItems) {
           group.items = group.items.filter(
@@ -333,7 +351,8 @@ const restaurantOwnerMenuSlice = createSlice({
       })
 
       .addCase(removeMenuItem.rejected, (state, action) => {
-        state.actionLoading = false;
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
         state.actionError = action.payload;
       });
   },

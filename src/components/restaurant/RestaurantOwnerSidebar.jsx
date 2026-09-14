@@ -49,7 +49,7 @@ const NAV_ITEMS = [
 function RestaurantOwnerSidebar({ mobileOpen, onMobileClose }) {
   const navigation = (
     <>
-      <List sx={{ p: 2 }}>
+      <List sx={{ p: 2, position: "sticky" }}>
         {NAV_ITEMS.map((item) => (
           <ListItemButton
             key={item.path}
