@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  createOwnerRestaurant,
   deleteOwnerRestaurant,
   getOwnerRestaurants,
   updateOwnerRestaurant,
@@ -27,6 +28,19 @@ export const fetchOwnerRestaurants = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch restaurants",
+      );
+    }
+  },
+);
+
+export const createRestaurant = createAsyncThunk(
+  "restaurantOwner/createRestaurant",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await createOwnerRestaurant(data);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create restaurant",
       );
     }
   },
@@ -93,6 +107,30 @@ const restaurantOwnerSlice = createSlice({
       .addCase(fetchOwnerRestaurants.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      .addCase(createRestaurant.pending, (state) => {
+        state.actionLoadingType = "CREATE_RESTAURANT";
+        state.actionLoadingId = null;
+        state.actionError = null;
+      })
+
+      .addCase(createRestaurant.fulfilled, (state, action) => {
+        const newRestaurant = action.payload;
+
+        state.restaurants.unshift(newRestaurant);
+
+        // Make the newly created restaurant active
+        state.activeRestaurantId = newRestaurant.id;
+
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+      })
+
+      .addCase(createRestaurant.rejected, (state, action) => {
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+        state.actionError = action.payload;
       })
 
       .addCase(updateRestaurant.pending, (state, action) => {

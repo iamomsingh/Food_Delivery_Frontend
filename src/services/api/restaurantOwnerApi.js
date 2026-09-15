@@ -1,5 +1,11 @@
 import api from "./axios";
 
+export async function createOwnerRestaurant(data) {
+  const response = await api.post("/restaurants/", data);
+
+  return response.data.data;
+}
+
 export async function getOwnerRestaurants() {
   const response = await api.get("/restaurants/me");
 

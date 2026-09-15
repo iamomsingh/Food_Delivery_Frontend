@@ -23,29 +23,37 @@ const initialForm = {
 
 function RestaurantFormDialog({
   open,
-  restaurant,
+  mode = "edit",
+  restaurant = null,
   loading = false,
   onClose,
   onSubmit,
 }) {
   const [form, setForm] = useState(initialForm);
 
+  const isEditMode = mode === "edit";
+
   useEffect(() => {
-    if (!restaurant) {
-      setForm(initialForm);
+    if (!open) {
       return;
     }
 
-    setForm({
-      name: restaurant.name || "",
-      description: restaurant.description || "",
-      phone: restaurant.phone || "",
-      email: restaurant.email || "",
-      logoUrl: restaurant.logoUrl || "",
-      coverImageUrl: restaurant.coverImageUrl || "",
-      isPureVeg: restaurant.isPureVeg ?? false,
-    });
-  }, [restaurant, open]);
+    if (isEditMode && restaurant) {
+      setForm({
+        name: restaurant.name || "",
+        description: restaurant.description || "",
+        phone: restaurant.phone || "",
+        email: restaurant.email || "",
+        logoUrl: restaurant.logoUrl || "",
+        coverImageUrl: restaurant.coverImageUrl || "",
+        isPureVeg: restaurant.isPureVeg ?? false,
+      });
+
+      return;
+    }
+
+    setForm(initialForm);
+  }, [open, isEditMode, restaurant]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -78,7 +86,9 @@ function RestaurantFormDialog({
       maxWidth='sm'
     >
       <form onSubmit={handleSubmit}>
-        <DialogTitle>Edit Restaurant</DialogTitle>
+        <DialogTitle>
+          {isEditMode ? "Edit Restaurant" : "Create Restaurant"}
+        </DialogTitle>
 
         <DialogContent>
           <Stack spacing={2.5} sx={{ pt: 1 }}>
@@ -89,6 +99,7 @@ function RestaurantFormDialog({
               onChange={handleChange}
               required
               fullWidth
+              autoFocus
             />
 
             <TextField
@@ -153,7 +164,7 @@ function RestaurantFormDialog({
           </Button>
 
           <Button type='submit' variant='contained' loading={loading}>
-            Save Changes
+            {isEditMode ? "Save Changes" : "Create Restaurant"}
           </Button>
         </DialogActions>
       </form>
