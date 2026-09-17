@@ -9,6 +9,7 @@ import restaurantOwnerReducer from "../features/restaurant/restaurantOwnerSlice"
 import restaurantOwnerOrderReducer from "../features/restaurant/restaurantOwnerOrderSlice";
 import restaurantOwnerDeliveryPartnerReducer from "../features/restaurant/restaurantOwnerDeliveryPartnerSlice";
 import restaurantOwnerMenuReducer from "../features/restaurant/restaurantOwnerMenuSlice";
+import adminRestaurantReducer from "../features/admin/adminRestaurantSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,5 +22,6 @@ export const store = configureStore({
     restaurantOwnerOrder: restaurantOwnerOrderReducer,
     restaurantOwnerDeliveryPartner: restaurantOwnerDeliveryPartnerReducer,
     restaurantOwnerMenu: restaurantOwnerMenuReducer,
+    adminRestaurant: adminRestaurantReducer,
   },
 });

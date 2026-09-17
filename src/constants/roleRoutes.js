@@ -18,6 +18,6 @@ export const ROLE_CONFIG = {
 
   [ROLES.ADMIN]: {
     label: "Admin",
-    path: "/admin",
+    path: "/admin/dashboard",
   },
 };

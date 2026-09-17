@@ -35,6 +35,8 @@ import RestaurantManagementPage from "../pages/restaurant/RestaurantManagementPa
 
 // Admin Pages
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
+import AdminRestaurantsPage from "../pages/admin/restaurant/AdminRestaurantsPage";
+import AdminRestaurantDetailsPage from "../pages/admin/restaurant/AdminRestaurantDetailsPage";
 
 // Delivery-Partner Pages
 import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
@@ -96,7 +98,15 @@ function AppRoutes() {
         {/* Admin Route   */}
         <Route element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}>
           <Route element={<AdminLayout />}>
-            <Route path='/admin' element={<AdminDashboardPage />} />
+            <Route path='/admin/dashboard' element={<AdminDashboardPage />} />
+            <Route
+              path='/admin/restaurants'
+              element={<AdminRestaurantsPage />}
+            />
+            <Route
+              path='/admin/restaurants/:restaurantId'
+              element={<AdminRestaurantDetailsPage />}
+            />
           </Route>
         </Route>
       </Route>
