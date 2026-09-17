@@ -23,6 +23,22 @@ import {
 import Loader from "../../../components/common/Loader";
 import ErrorState from "../../../components/common/ErrorState";
 
+function getStatusColor(status) {
+  switch (status) {
+    case "APPROVED":
+      return "success";
+
+    case "PENDING":
+      return "warning";
+
+    case "REJECTED":
+      return "error";
+
+    default:
+      return "default";
+  }
+}
+
 function AdminRestaurantDetailsPage() {
   const { restaurantId } = useParams();
 
@@ -135,7 +151,7 @@ function AdminRestaurantDetailsPage() {
               label={restaurant.status}
               size='small'
               sx={{ mt: 1 }}
-              color={restaurant.status === "APPROVED" ? "success" : "warning"}
+              color={getStatusColor(restaurant.status)}
             />
           </Box>
         </Stack>
