@@ -50,7 +50,12 @@ function AdminRestaurantTable({
         const actionLoading = isApproving || isRejecting;
 
         return (
-          <TableRow key={restaurant.id} hover>
+          <TableRow
+            key={restaurant.id}
+            hover
+            sx={{ cursor: "pointer" }}
+            onClick={() => onView(restaurant.id)}
+          >
             {/* Restaurant */}
             <TableCell>
               <Stack
@@ -145,10 +150,7 @@ function AdminRestaurantTable({
             </TableCell>
 
             {/* Actions */}
-            <TableCell
-              onClick={(event) => event.stopPropagation()}
-              sx={{ cursor: "pointer" }}
-            >
+            <TableCell onClick={(event) => event.stopPropagation()}>
               <Stack direction='row' spacing={1.5}>
                 <Tooltip title='View details'>
                   <IconButton

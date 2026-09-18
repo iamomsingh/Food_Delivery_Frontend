@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -13,15 +13,18 @@ import {
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 
 import {
   fetchAdminRestaurantDetails,
   clearSelectedRestaurant,
+  approveRestaurant,
+  fetchAdminRestaurants,
+  rejectRestaurant,
 } from "../../../features/admin/adminRestaurantSlice";
 
 import Loader from "../../../components/common/Loader";
 import ErrorState from "../../../components/common/ErrorState";
+import RestaurantRejectDialog from "../../../components/admin/restaurant/RestaurantRejectDialog";
 
 function getStatusColor(status) {
   switch (status) {
@@ -45,9 +48,15 @@ function AdminRestaurantDetailsPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { selectedRestaurant, detailLoading, detailError } = useSelector(
-    (state) => state.adminRestaurant,
-  );
+  const [restaurantToReject, setRestaurantToReject] = useState(null);
+
+  const {
+    selectedRestaurant,
+    detailLoading,
+    detailError,
+    actionLoadingType,
+    actionLoadingId,
+  } = useSelector((state) => state.adminRestaurant);
 
   useEffect(() => {
     dispatch(fetchAdminRestaurantDetails(restaurantId));
@@ -56,6 +65,47 @@ function AdminRestaurantDetailsPage() {
       dispatch(clearSelectedRestaurant());
     };
   }, [dispatch, restaurantId]);
+
+  // APPROVE
+  const handleApprove = async (restaurantId) => {
+    const result = await dispatch(approveRestaurant(restaurantId));
+
+    if (approveRestaurant.fulfilled.match(result)) {
+      dispatch(
+        fetchAdminRestaurants({
+          page: pagination.page,
+          limit: pagination.limit,
+          status: filters.status,
+        }),
+      );
+    }
+  };
+
+  // OPEN REJECT DIALOG
+  const handleReject = (restaurant) => {
+    setRestaurantToReject(restaurant);
+  };
+
+  // CONFIRM REJECT
+  const handleRejectConfirm = async () => {
+    if (!restaurantToReject) {
+      return;
+    }
+
+    const result = await dispatch(rejectRestaurant(restaurantToReject.id));
+
+    if (rejectRestaurant.fulfilled.match(result)) {
+      setRestaurantToReject(null);
+
+      dispatch(
+        fetchAdminRestaurants({
+          page: pagination.page,
+          limit: pagination.limit,
+          status: filters.status,
+        }),
+      );
+    }
+  };
 
   if (detailLoading) {
     return <Loader />;
@@ -70,6 +120,16 @@ function AdminRestaurantDetailsPage() {
   }
 
   const restaurant = selectedRestaurant;
+
+  const isApproving =
+    actionLoadingType === "APPROVE_RESTAURANT" &&
+    actionLoadingId === restaurant.id;
+
+  const isRejecting =
+    actionLoadingType === "REJECT_RESTAURANT" &&
+    actionLoadingId === restaurant.id;
+
+  const actionLoading = isApproving || isRejecting;
 
   return (
     <Box>
@@ -102,26 +162,12 @@ function AdminRestaurantDetailsPage() {
           }}
           spacing={3}
           sx={{
-            alignItems: {
-              xs: "flex-start",
-              sm: "center",
-            },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "center" },
+            mb: 3,
           }}
         >
-          <Box
-            sx={{
-              width: 100,
-              height: 100,
-              borderRadius: 3,
-              border: 1,
-              borderColor: "divider",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              flexShrink: 0,
-            }}
-          >
+          <Box>
             {restaurant.logoUrl ? (
               <Box
                 component='img'
@@ -134,19 +180,19 @@ function AdminRestaurantDetailsPage() {
                 }}
               />
             ) : (
-              <RestaurantIcon fontSize='large' />
+              <Box>
+                <Typography variant='h5' fontWeight={700}>
+                  {restaurant.name}
+                </Typography>
+
+                <Typography color='textSecondary' sx={{ mt: 0.5 }}>
+                  @{restaurant.slug}
+                </Typography>
+              </Box>
             )}
           </Box>
 
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant='h5' fontWeight={700}>
-              {restaurant.name}
-            </Typography>
-
-            <Typography color='textSecondary' sx={{ mt: 0.5 }}>
-              @{restaurant.slug}
-            </Typography>
-
+          <Box>
             <Chip
               label={restaurant.status}
               size='small'
@@ -154,6 +200,65 @@ function AdminRestaurantDetailsPage() {
               color={getStatusColor(restaurant.status)}
             />
           </Box>
+        </Stack>
+
+        <Stack
+          direction={{
+            xs: "column",
+            sm: "row",
+          }}
+          spacing={1}
+          sx={{ mt: 3 }}
+        >
+          {restaurant.status === "PENDING" && (
+            <>
+              <Button
+                variant='contained'
+                color='success'
+                // startIcon={<CheckIcon />}
+                disabled={actionLoading}
+                onClick={() => handleApprove(restaurant.is)}
+              >
+                Approve
+              </Button>
+
+              <Button
+                variant='outlined'
+                color='error'
+                // startIcon={<CloseIcon />}
+                disabled={actionLoading}
+                onClick={() => handleReject(restaurant)}
+              >
+                Reject
+              </Button>
+
+              {/* <Tooltip title='Approve'>
+                <span>
+                  <IconButton
+                    size='small'
+                    color='success'
+                    disabled={actionLoading}
+                    onClick={() => onApprove(restaurant.id)}
+                  >
+                    <CheckIcon fontSize='small' />
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Tooltip title='Reject'>
+                <span>
+                  <IconButton
+                    size='small'
+                    color='error'
+                    disabled={actionLoading}
+                    onClick={() => onReject(restaurant)}
+                  >
+                    <CloseIcon fontSize='small' />
+                  </IconButton>
+                </span>
+              </Tooltip> */}
+            </>
+          )}
         </Stack>
       </Paper>
 
@@ -266,6 +371,17 @@ function AdminRestaurantDetailsPage() {
 
         <InfoRow label='Created At' value={formatDate(restaurant.createdAt)} />
       </Paper>
+
+      <RestaurantRejectDialog
+        open={Boolean(restaurantToReject)}
+        restaurant={restaurantToReject}
+        loading={
+          actionLoadingType === "REJECT_RESTAURANT" &&
+          actionLoadingId === restaurantToReject?.id
+        }
+        onClose={() => setRestaurantToReject(null)}
+        onConfirm={handleRejectConfirm}
+      />
     </Box>
   );
 }

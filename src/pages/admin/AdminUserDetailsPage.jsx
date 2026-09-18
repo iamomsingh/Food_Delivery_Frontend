@@ -92,6 +92,8 @@ function AdminUserDetailsPage() {
     actionError,
   } = useSelector((state) => state.adminUser);
 
+  const currentUser = useSelector((state) => state.auth.user);
+
   const [actionStatus, setActionStatus] = useState("");
 
   useEffect(() => {
@@ -138,6 +140,8 @@ function AdminUserDetailsPage() {
   const isActionLoading =
     actionLoadingType === "UPDATE_USER_STATUS" &&
     actionLoadingId === selectedUser?.id;
+
+  const isCurrentAdmin = selectedUser?.id === currentUser.id;
 
   if (detailLoading) {
     return (
@@ -202,9 +206,9 @@ function AdminUserDetailsPage() {
           sx={{
             justifyContent: "space-between",
             alignItems: { xs: "flex-start", sm: "center" },
+            mb: 3,
           }}
-          spacing={2}
-          mb={3}
+          spacing={3}
         >
           <Box>
             <Typography variant='h5' fontWeight={600}>
@@ -230,37 +234,43 @@ function AdminUserDetailsPage() {
           spacing={1}
           sx={{ mt: 3 }}
         >
-          {selectedUser.status !== "ACTIVE" && (
-            <Button
-              variant='outlined'
-              color='success'
-              disabled={isActionLoading}
-              onClick={() => handleStatusAction("ACTIVE")}
-            >
-              Activate
-            </Button>
-          )}
-
-          {selectedUser.status === "ACTIVE" && (
+          {!isCurrentAdmin ? (
             <>
-              <Button
-                variant='outlined'
-                color='warning'
-                disabled={isActionLoading}
-                onClick={() => handleStatusAction("SUSPENDED")}
-              >
-                Suspend
-              </Button>
+              {selectedUser.status !== "ACTIVE" && (
+                <Button
+                  variant='outlined'
+                  color='success'
+                  disabled={isActionLoading}
+                  onClick={() => handleStatusAction("ACTIVE")}
+                >
+                  Activate
+                </Button>
+              )}
 
-              <Button
-                variant='outlined'
-                color='error'
-                disabled={isActionLoading}
-                onClick={() => handleStatusAction("BLOCKED")}
-              >
-                Block
-              </Button>
+              {selectedUser.status === "ACTIVE" && (
+                <>
+                  <Button
+                    variant='outlined'
+                    color='warning'
+                    disabled={isActionLoading}
+                    onClick={() => handleStatusAction("SUSPENDED")}
+                  >
+                    Suspend
+                  </Button>
+
+                  <Button
+                    variant='outlined'
+                    color='error'
+                    disabled={isActionLoading}
+                    onClick={() => handleStatusAction("BLOCKED")}
+                  >
+                    Block
+                  </Button>
+                </>
+              )}
             </>
+          ) : (
+            <Chip label='ADMIN' />
           )}
         </Stack>
       </Paper>
