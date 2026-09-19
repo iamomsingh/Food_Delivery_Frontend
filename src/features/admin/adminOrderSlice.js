@@ -1,6 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { getAdminRecentOrders } from "../../services/api/adminDashboardApi";
+import {
+  getAdminOrderDetails,
+  getAdminRecentOrders,
+} from "../../services/api/adminDashboardApi";
 
 const initialFilters = {
   status: "",
@@ -16,6 +19,8 @@ const initialFilters = {
 const initialState = {
   orders: [],
 
+  selectedOrder: null,
+
   pagination: {
     totalItems: 0,
     currentPage: 1,
@@ -29,6 +34,9 @@ const initialState = {
 
   loading: false,
   error: null,
+
+  detailLoading: false,
+  detailError: null,
 };
 
 export const fetchAdminOrders = createAsyncThunk(
@@ -44,6 +52,19 @@ export const fetchAdminOrders = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch orders",
+      );
+    }
+  },
+);
+
+export const fetchAdminOrderDetails = createAsyncThunk(
+  "adminOrder/fetchOrderDetails",
+  async (orderId, { rejectWithValue }) => {
+    try {
+      return await getAdminOrderDetails(orderId);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch order details",
       );
     }
   },
@@ -82,6 +103,11 @@ const adminOrderSlice = createSlice({
 
       state.pagination.currentPage = 1;
     },
+
+    clearSelectedOrder: (state) => {
+      state.selectedOrder = null;
+      state.detailError = null;
+    },
   },
 
   extraReducers: (builder) => {
@@ -104,6 +130,21 @@ const adminOrderSlice = createSlice({
 
         state.error = action.payload || "Failed to fetch orders";
       });
+
+    builder
+      .addCase(fetchAdminOrderDetails.pending, (state) => {
+        state.detailLoading = true;
+        state.detailError = null;
+        state.selectedOrder = null;
+      })
+      .addCase(fetchAdminOrderDetails.fulfilled, (state, action) => {
+        state.detailLoading = false;
+        state.selectedOrder = action.payload;
+      })
+      .addCase(fetchAdminOrderDetails.rejected, (state, action) => {
+        state.detailLoading = false;
+        state.detailError = action.payload || "Failed to fetch order details";
+      });
   },
 });
 
@@ -112,6 +153,7 @@ export const {
   resetOrderFilters,
   setOrderPage,
   setOrderPageSize,
+  clearSelectedOrder,
 } = adminOrderSlice.actions;
 
 export default adminOrderSlice.reducer;

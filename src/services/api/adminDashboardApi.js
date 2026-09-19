@@ -20,6 +20,12 @@ export async function getAdminRecentOrders(params = {}) {
   return response.data.data;
 }
 
+export async function getAdminOrderDetails(orderId) {
+  const response = await api.get(`/admin/orders/${orderId}`);
+
+  return response.data.data;
+}
+
 export async function getAdminAnalytics() {
   const response = await api.get("/admin/analytics");
 

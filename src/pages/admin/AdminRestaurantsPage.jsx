@@ -21,11 +21,11 @@ import {
   Typography,
 } from "@mui/material";
 
-import Loader from "../../../components/common/Loader";
-import EmptyState from "../../../components/common/EmptyState";
+import Loader from "../../components/common/Loader";
+import EmptyState from "../../components/common/EmptyState";
 
-import AdminRestaurantTable from "../../../components/admin/restaurant/AdminRestaurantTable";
-import RestaurantRejectDialog from "../../../components/admin/restaurant/RestaurantRejectDialog";
+import AdminRestaurantTable from "../../components/admin/restaurant/AdminRestaurantTable";
+import RestaurantRejectDialog from "../../components/admin/restaurant/RestaurantRejectDialog";
 
 import {
   approveRestaurant,
@@ -34,7 +34,7 @@ import {
   setRestaurantStatusFilter,
   setRestaurantPage,
   setRestaurantLimit,
-} from "../../../features/admin/adminRestaurantSlice";
+} from "../../features/admin/adminRestaurantSlice";
 
 function AdminRestaurantsPage() {
   const dispatch = useDispatch();

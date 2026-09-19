@@ -209,7 +209,7 @@ function AdminOrderTable({ orders, loading, onView }) {
                         {formatOrderId(order.id)}
                       </Typography>
 
-                      <Typography variant='caption' color='text.secondary'>
+                      <Typography variant='caption' color='textSecondary'>
                         Order ID
                       </Typography>
                     </Stack>
@@ -236,7 +236,7 @@ function AdminOrderTable({ orders, loading, onView }) {
                           {order.customer?.firstName} {order.customer?.lastName}
                         </Typography>
 
-                        <Typography variant='caption' color='text.secondary'>
+                        <Typography variant='caption' color='textSecondary'>
                           Customer
                         </Typography>
                       </Box>

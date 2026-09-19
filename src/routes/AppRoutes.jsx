@@ -35,12 +35,14 @@ import RestaurantManagementPage from "../pages/restaurant/RestaurantManagementPa
 
 // Admin Pages
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
-import AdminRestaurantsPage from "../pages/admin/restaurant/AdminRestaurantsPage";
-import AdminRestaurantDetailsPage from "../pages/admin/restaurant/AdminRestaurantDetailsPage";
+import AdminRestaurantsPage from "../pages/admin/AdminRestaurantsPage";
+import AdminRestaurantDetailsPage from "../pages/admin/AdminRestaurantDetailsPage";
 import AdminDeliveryPartnersPage from "../pages/admin/AdminDeliveryPartnersPage";
 import AdminDeliveryPartnerDetailsPage from "../pages/admin/AdminDeliveryPartnerDetailsPage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
 import AdminUserDetailsPage from "../pages/admin/AdminUserDetailsPage";
+import AdminOrdersPage from "../pages/admin/AdminOrdersPage";
+import AdminOrderDetailsPage from "../pages/admin/AdminOrderDetailsPage";
 
 // Delivery-Partner Pages
 import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
@@ -49,7 +51,6 @@ import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
-import AdminOrdersPage from "../pages/admin/AdminOrdersPage";
 
 function AppRoutes() {
   return (
@@ -133,6 +134,11 @@ function AppRoutes() {
             />
 
             <Route path='/admin/orders' element={<AdminOrdersPage />} />
+
+            <Route
+              path='/admin/orders/:orderId'
+              element={<AdminOrderDetailsPage />}
+            />
           </Route>
         </Route>
       </Route>

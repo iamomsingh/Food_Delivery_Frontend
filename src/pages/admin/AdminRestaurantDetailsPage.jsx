@@ -20,11 +20,11 @@ import {
   approveRestaurant,
   fetchAdminRestaurants,
   rejectRestaurant,
-} from "../../../features/admin/adminRestaurantSlice";
+} from "../../features/admin/adminRestaurantSlice";
 
-import Loader from "../../../components/common/Loader";
-import ErrorState from "../../../components/common/ErrorState";
-import RestaurantRejectDialog from "../../../components/admin/restaurant/RestaurantRejectDialog";
+import Loader from "../../components/common/Loader";
+import ErrorState from "../../components/common/ErrorState";
+import RestaurantRejectDialog from "../../components/admin/restaurant/RestaurantRejectDialog";
 
 function getStatusColor(status) {
   switch (status) {
