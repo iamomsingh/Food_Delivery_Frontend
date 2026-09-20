@@ -5,7 +5,7 @@ export const ROLE_CONFIG = {
     label: "Customer",
   },
 
-  [ROLES.RESTAURANT_OWNER]: {
+  [ROLES.RESTAURANT]: {
     label: "Restaurant",
   },
 

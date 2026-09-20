@@ -6,14 +6,14 @@ export const ROLE_CONFIG = {
     path: "/",
   },
 
-  [ROLES.RESTAURANT_OWNER]: {
+  [ROLES.RESTAURANT]: {
     label: "Restaurant",
-    path: "/restaurant",
+    path: "/restaurant/dashboard",
   },
 
   [ROLES.DELIVERY]: {
     label: "Delivery",
-    path: "/delivery",
+    path: "/delivery/dashboard",
   },
 
   [ROLES.ADMIN]: {

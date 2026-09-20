@@ -25,7 +25,7 @@ const DRAWER_WIDTH = 240;
 const NAV_ITEMS = [
   {
     label: "Dashboard",
-    path: "/restaurant",
+    path: "/restaurant/dashboard",
     icon: <DashboardOutlined />,
     end: true,
   },

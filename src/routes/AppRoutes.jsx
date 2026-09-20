@@ -46,6 +46,9 @@ import AdminOrderDetailsPage from "../pages/admin/AdminOrderDetailsPage";
 
 // Delivery-Partner Pages
 import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
+import DeliveryOrdersPage from "../pages/delivery/DeliveryOrderPage";
+import DeliveryOrderDetailsPage from "../pages/delivery/DeliveryOrderDetailsPage";
+import DeliveryProfilePage from "../pages/delivery/DeliveryProfilePage";
 
 // Global Pages
 import NotFoundPage from "../pages/NotFoundPage";
@@ -76,9 +79,12 @@ function AppRoutes() {
         </Route>
 
         {/* Restaurant_Owner Route*/}
-        <Route element={<RoleRoute allowedRoles={[ROLES.RESTAURANT_OWNER]} />}>
+        <Route element={<RoleRoute allowedRoles={[ROLES.RESTAURANT]} />}>
           <Route element={<RestaurantLayout />}>
-            <Route path='/restaurant' element={<RestaurantDashboardPage />} />
+            <Route
+              path='/restaurant/dashboard'
+              element={<RestaurantDashboardPage />}
+            />
             <Route
               path='/restaurant/orders'
               element={<RestaurantOrdersPage />}
@@ -92,13 +98,6 @@ function AppRoutes() {
               path='/restaurant/management'
               element={<RestaurantManagementPage />}
             />
-          </Route>
-        </Route>
-
-        {/* Delivery Route*/}
-        <Route element={<RoleRoute allowedRoles={[ROLES.DELIVERY]} />}>
-          <Route element={<DeliveryLayout />}>
-            <Route path='/delivery' element={<DeliveryDashboardPage />} />
           </Route>
         </Route>
 
@@ -142,6 +141,25 @@ function AppRoutes() {
             />
 
             <Route path='/admin/analytics' element={<AdminAnalyticsPage />} />
+          </Route>
+        </Route>
+
+        {/* Delivery Route*/}
+        <Route element={<RoleRoute allowedRoles={[ROLES.DELIVERY]} />}>
+          <Route element={<DeliveryLayout />}>
+            <Route
+              path='/delivery/dashboard'
+              element={<DeliveryDashboardPage />}
+            />
+
+            <Route path='/delivery/orders' element={<DeliveryOrdersPage />} />
+
+            <Route
+              path='/delivery/orders/:orderId'
+              element={<DeliveryOrderDetailsPage />}
+            />
+
+            <Route path='/delivery/profile' element={<DeliveryProfilePage />} />
           </Route>
         </Route>
       </Route>
