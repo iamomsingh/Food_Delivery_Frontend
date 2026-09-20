@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
+  getAdminAnalytics,
   getAdminDashboard,
   getAdminRevenue,
 } from "../../services/api/adminDashboardApi";
@@ -15,11 +16,15 @@ const initialState = {
 
   revenue: null,
 
+  analytics: null,
+
   overviewLoading: false,
   revenueLoading: false,
+  analyticsLoading: false,
 
   overviewError: null,
   revenueError: null,
+  analyticsError: null,
 };
 
 export const fetchAdminDashboard = createAsyncThunk(
@@ -43,6 +48,19 @@ export const fetchAdminRevenue = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch revenue",
+      );
+    }
+  },
+);
+
+export const fetchAdminAnalytics = createAsyncThunk(
+  "adminDashboard/fetchAnalytics",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getAdminAnalytics();
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch analytics",
       );
     }
   },
@@ -97,6 +115,20 @@ const adminDashboardSlice = createSlice({
         state.revenueLoading = false;
 
         state.revenueError = action.payload || "Failed to fetch revenue";
+      });
+
+    builder
+      .addCase(fetchAdminAnalytics.pending, (state) => {
+        state.analyticsLoading = true;
+        state.analyticsError = null;
+      })
+      .addCase(fetchAdminAnalytics.fulfilled, (state, action) => {
+        state.analyticsLoading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchAdminAnalytics.rejected, (state, action) => {
+        state.analyticsLoading = false;
+        state.analyticsError = action.payload || "Failed to fetch analytics";
       });
   },
 });

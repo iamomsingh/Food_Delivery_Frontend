@@ -51,6 +51,7 @@ import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
+import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage";
 
 function AppRoutes() {
   return (
@@ -139,6 +140,8 @@ function AppRoutes() {
               path='/admin/orders/:orderId'
               element={<AdminOrderDetailsPage />}
             />
+
+            <Route path='/admin/analytics' element={<AdminAnalyticsPage />} />
           </Route>
         </Route>
       </Route>
