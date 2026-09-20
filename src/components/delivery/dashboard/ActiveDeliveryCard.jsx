@@ -9,99 +9,116 @@ import {
   Typography,
 } from "@mui/material";
 
-import RestaurantOutlinedIcon from "@mui/icons-material/RestaurantOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import {
+  ArrowForward,
+  LocationOn,
+  Person,
+  Restaurant,
+} from "@mui/icons-material";
 
-import { useNavigate } from "react-router-dom";
-
-function getStatusColor(status) {
+function getStatusConfig(status) {
   switch (status) {
     case "READY_FOR_PICKUP":
-      return "warning";
+      return {
+        label: "Ready for Pickup",
+        color: "warning",
+        actionLabel: "Pick Up Order",
+      };
 
     case "PICKED_UP":
-      return "info";
+      return {
+        label: "Picked Up",
+        color: "info",
+        actionLabel: "Start Delivery",
+      };
 
     case "OUT_FOR_DELIVERY":
-      return "primary";
+      return {
+        label: "Out for Delivery",
+        color: "primary",
+        actionLabel: "Mark as Delivered",
+      };
+
+    case "DELIVERED":
+      return {
+        label: "Delivered",
+        color: "success",
+        actionLabel: null,
+      };
 
     default:
-      return "default";
+      return {
+        label: status || "Unknown",
+        color: "default",
+        actionLabel: null,
+      };
   }
 }
 
-function getStatusLabel(status) {
-  switch (status) {
-    case "READY_FOR_PICKUP":
-      return "Ready for Pickup";
+function ActiveDeliveryCard({
+  activeOrder,
+  actionLoading = false,
+  actionError = null,
+  onAction,
+  onViewDetails,
+}) {
+  if (!activeOrder) {
+    return (
+      <Card>
+        <CardContent>
+          <Stack spacing={1}>
+            <Typography variant='h6' fontWeight={600}>
+              No Active Delivery
+            </Typography>
 
-    case "PICKED_UP":
-      return "Picked Up";
-
-    case "OUT_FOR_DELIVERY":
-      return "Out for Delivery";
-
-    default:
-      return status;
+            <Typography variant='body2' color='text.secondary'>
+              You currently don't have an active delivery.
+            </Typography>
+          </Stack>
+        </CardContent>
+      </Card>
+    );
   }
-}
 
-function ActiveDeliveryCard({ order }) {
-  const navigate = useNavigate();
-
-  const {
-    orderId,
-    status,
-    totalAmount,
-    restaurant,
-    customer,
-    deliveryAddress,
-  } = order;
+  const statusConfig = getStatusConfig(activeOrder.status);
 
   return (
     <Card
-      elevation={0}
       sx={{
-        border: 1,
+        width: "100%",
+        border: "1px solid",
         borderColor: "divider",
-        borderRadius: 3,
-        height: "100%",
       }}
     >
-      <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Stack spacing={2.5}>
           {/* Header */}
           <Stack
-            direction='row'
-            spacing={2}
+            direction={{ xs: "column", sm: "row" }}
+            gap={1}
             sx={{
               justifyContent: "space-between",
-              alignItems: "flex-start",
+              alignItems: { xs: "flex-start", sm: "center" },
             }}
           >
             <Box>
-              <Typography variant='caption' color='textSecondary'>
-                Order
+              <Typography
+                variant='overline'
+                color='textSecondary'
+                fontWeight={600}
+              >
+                Active Delivery
               </Typography>
 
-              <Typography
-                variant='subtitle1'
-                fontWeight={700}
-                sx={{
-                  wordBreak: "break-all",
-                }}
-              >
-                #{orderId.slice(0, 8)}
+              <Typography variant='h6' fontWeight={700}>
+                Order #{activeOrder.orderId?.slice(0, 8)}
               </Typography>
             </Box>
 
             <Chip
-              label={getStatusLabel(status)}
-              color={getStatusColor(status)}
+              label={statusConfig.label}
+              color={statusConfig.color}
               size='small'
-              sx={{ fontWeight: 600 }}
             />
           </Stack>
 
@@ -113,16 +130,22 @@ function ActiveDeliveryCard({ order }) {
             spacing={1.5}
             sx={{ alignItems: "flex-start" }}
           >
-            <RestaurantOutlinedIcon color='primary' fontSize='small' />
+            <Restaurant color='action' />
 
             <Box>
-              <Typography variant='body2' fontWeight={600}>
-                {restaurant?.name}
+              <Typography variant='body2' color='textSecondary'>
+                Restaurant
               </Typography>
 
-              <Typography variant='caption' color='textSecondary'>
-                {restaurant?.phone}
+              <Typography variant='body1' fontWeight={600}>
+                {activeOrder.restaurant?.name || "Restaurant"}
               </Typography>
+
+              {activeOrder.restaurant?.phone && (
+                <Typography variant='body2' color='textSecondary'>
+                  {activeOrder.restaurant.phone}
+                </Typography>
+              )}
             </Box>
           </Stack>
 
@@ -132,72 +155,121 @@ function ActiveDeliveryCard({ order }) {
             spacing={1.5}
             sx={{ alignItems: "flex-start" }}
           >
-            <PersonOutlineOutlinedIcon color='action' fontSize='small' />
+            <Person color='action' />
 
             <Box>
-              <Typography variant='body2' fontWeight={600}>
-                {customer?.name}
+              <Typography variant='body2' color='textSecondary'>
+                Customer
               </Typography>
 
-              <Typography variant='caption' color='textSecondary'>
-                {customer?.phone || "Phone not available"}
+              <Typography variant='body1' fontWeight={600}>
+                {activeOrder.customer?.name || "Customer"}
               </Typography>
+
+              {activeOrder.customer?.phone && (
+                <Typography variant='body2' color='textSecondary'>
+                  {activeOrder.customer.phone}
+                </Typography>
+              )}
             </Box>
           </Stack>
 
-          {/* Address */}
+          {/* Delivery Address */}
           <Stack
             direction='row'
             spacing={1.5}
             sx={{ alignItems: "flex-start" }}
           >
-            <LocationOnOutlinedIcon color='action' fontSize='small' />
+            <LocationOn color='action' />
 
             <Box>
-              <Typography variant='body2' fontWeight={600}>
-                {deliveryAddress?.label || "Delivery Address"}
+              <Typography variant='body2' color='textSecondary'>
+                Delivery Address
+              </Typography>
+
+              <Typography variant='body1' fontWeight={600}>
+                {activeOrder.deliveryAddress?.label || "Delivery Address"}
               </Typography>
 
               <Typography variant='body2' color='textSecondary'>
-                {deliveryAddress?.address}
+                {activeOrder.deliveryAddress?.address}
               </Typography>
 
-              <Typography variant='caption' color='textSecondary'>
-                {deliveryAddress?.city}, {deliveryAddress?.state}{" "}
-                {deliveryAddress?.pinCode}
+              <Typography variant='body2' color='textSecondary'>
+                {[
+                  activeOrder.deliveryAddress?.city,
+                  activeOrder.deliveryAddress?.state,
+                  activeOrder.deliveryAddress?.pinCode,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
               </Typography>
             </Box>
           </Stack>
 
           <Divider />
 
-          {/* Footer */}
+          {/* Amount */}
           <Stack
             direction='row'
-            spacing={2}
             sx={{
               justifyContent: "space-between",
               alignItems: "center",
             }}
           >
-            <Box>
-              <Typography variant='caption' color='textSecondary'>
-                Order Amount
-              </Typography>
+            <Typography variant='body2' color='textSecondary'>
+              Order Amount
+            </Typography>
 
-              <Typography variant='h6' fontWeight={700}>
-                ₹{Number(totalAmount).toFixed(2)}
-              </Typography>
-            </Box>
-
-            <Button
-              variant='outlined'
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => navigate(`/delivery/orders/${orderId}`)}
-            >
-              View
-            </Button>
+            <Typography variant='h6' fontWeight={700}>
+              ₹{Number(activeOrder.totalAmount || 0).toFixed(2)}
+            </Typography>
           </Stack>
+
+          {/* Action Error */}
+          {actionError && (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: "error.main",
+                color: "error.contrastText",
+              }}
+            >
+              <Typography variant='body2'>{actionError}</Typography>
+            </Box>
+          )}
+
+          {/* Primary Action */}
+          {statusConfig.actionLabel && (
+            <Button
+              variant='contained'
+              size='large'
+              fullWidth
+              endIcon={<ArrowForward />}
+              loading={actionLoading}
+              disabled={actionLoading}
+              onClick={onAction}
+              sx={{
+                minHeight: 48,
+                fontWeight: 700,
+              }}
+            >
+              {statusConfig.actionLabel}
+            </Button>
+          )}
+
+          {/* Details */}
+          {onViewDetails && (
+            <Button
+              variant='text'
+              fullWidth
+              onClick={onViewDetails}
+              disabled={actionLoading}
+            >
+              View Delivery Details
+            </Button>
+          )}
         </Stack>
       </CardContent>
     </Card>

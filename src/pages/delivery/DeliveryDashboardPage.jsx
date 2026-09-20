@@ -1,17 +1,12 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
-
-import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import DeliveryStatsCards from "../../components/delivery/dashboard/DeliveryStatsCards";
+import DeliveryStatusCard from "../../components/delivery/dashboard/DeliveryStatusCard";
+import ActiveDeliveryCard from "../../components/delivery/dashboard/ActiveDeliveryCard";
 
 import {
   fetchDeliveryProfile,
@@ -19,62 +14,120 @@ import {
   updateDeliveryStatus,
 } from "../../features/delivery/deliverySlice";
 
-import { fetchDeliveryOrders } from "../../features/delivery/deliveryOrderSlice";
-
-import DeliveryStatsCards from "../../components/delivery/dashboard/DeliveryStatsCards";
-import DeliveryStatusCard from "../../components/delivery/dashboard/DeliveryStatusCard";
-import ActiveDeliveryCard from "../../components/delivery/dashboard/ActiveDeliveryCard";
+import {
+  fetchDeliveryOrders,
+  pickupOrder,
+  outForDelivery,
+  deliverOrder,
+} from "../../features/delivery/deliveryOrderSlice";
 
 function DeliveryDashboardPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     profile,
     stats,
     profileLoading,
+    profileError,
     statsLoading,
+    statsError,
     statusUpdating,
     statusError,
-    profileError,
   } = useSelector((state) => state.delivery);
 
-  const { orders, ordersLoading, ordersError } = useSelector(
-    (state) => state.deliveryOrder,
-  );
+  const { orders, ordersLoading, ordersError, actionLoading, actionError } =
+    useSelector((state) => state.deliveryOrder);
 
-  const fetchDashboardData = () => {
+  const activeOrder = orders?.[0] || null;
+
+  const fetchDashboardData = useCallback(() => {
     dispatch(fetchDeliveryProfile());
     dispatch(fetchDeliveryStats());
     dispatch(fetchDeliveryOrders());
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
-  const handleStatusToggle = (isOnline) => {
-    dispatch(updateDeliveryStatus(isOnline));
+  const handleStatusChange = async (isOnline) => {
+    if (statusUpdating) {
+      return;
+    }
+
+    const result = await dispatch(updateDeliveryStatus(isOnline));
+
+    if (result.meta.requestStatus === "fulfilled") {
+      await Promise.all([
+        dispatch(fetchDeliveryProfile()),
+        dispatch(fetchDeliveryStats()),
+        dispatch(fetchDeliveryOrders()),
+      ]);
+    }
   };
 
-  const displayName = profile?.user?.firstName || "Delivery Partner";
+  const handleDeliveryAction = async () => {
+    if (!activeOrder || actionLoading) {
+      return;
+    }
 
-  const activeOrders = orders ?? [];
+    let action;
+
+    switch (activeOrder.status) {
+      case "READY_FOR_PICKUP":
+        action = pickupOrder(activeOrder.orderId);
+        break;
+
+      case "PICKED_UP":
+        action = outForDelivery(activeOrder.orderId);
+        break;
+
+      case "OUT_FOR_DELIVERY":
+        action = deliverOrder(activeOrder.orderId);
+        break;
+
+      default:
+        return;
+    }
+
+    const result = await dispatch(action);
+
+    if (result.meta.requestStatus === "fulfilled") {
+      await Promise.all([
+        dispatch(fetchDeliveryOrders()),
+        dispatch(fetchDeliveryProfile()),
+        dispatch(fetchDeliveryStats()),
+      ]);
+    }
+  };
+
+  const handleViewDetails = () => {
+    if (!activeOrder) {
+      return;
+    }
+
+    navigate(`/delivery/orders/${activeOrder.orderId}`);
+  };
+
+  const handleRefresh = () => {
+    fetchDashboardData();
+  };
+
+  const isLoading = profileLoading || statsLoading || ordersLoading;
+
+  const dashboardError = profileError || statsError || ordersError;
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={{ xs: 2.5, md: 3 }}>
+      {/* Page Header */}
       <Stack
-        direction={{
-          xs: "column",
-          sm: "row",
-        }}
-        spacing={2}
+        direction={{ xs: "column", sm: "row" }}
         sx={{
           justifyContent: "space-between",
-          alignItems: {
-            xs: "stretch",
-            sm: "center",
-          },
+          alignItems: { xs: "flex-start", sm: "center" },
         }}
+        gap={2}
       >
         <Box>
           <Typography
@@ -88,100 +141,67 @@ function DeliveryDashboardPage() {
               },
             }}
           >
-            Welcome, {displayName}
+            Welcome
+            {profile?.user?.firstName ? `, ${profile.user.firstName}` : ""}
           </Typography>
 
-          <Typography variant='body2' color='textSecondary' sx={{ mt: 0.5 }}>
-            Manage your delivery activity from here.
+          <Typography variant='body1' color='textSecondary' sx={{ mt: 0.5 }}>
+            Manage your availability and current delivery.
           </Typography>
         </Box>
 
         <Button
           variant='outlined'
-          startIcon={<RefreshOutlinedIcon />}
-          onClick={fetchDashboardData}
-          disabled={profileLoading || statsLoading || ordersLoading}
-          sx={{
-            alignSelf: {
-              xs: "flex-start",
-              sm: "center",
-            },
-          }}
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
+          disabled={isLoading || actionLoading || statusUpdating}
         >
           Refresh
         </Button>
       </Stack>
 
-      {/* Profile error */}
-      {profileError && <Alert severity='error'>{profileError}</Alert>}
+      {/* Dashboard Error */}
+      {dashboardError && (
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "error.light",
+            bgcolor: "error.lighter",
+          }}
+        >
+          <Typography color='error'>{dashboardError}</Typography>
+        </Box>
+      )}
 
-      {/* Stats */}
+      {/* Statistics */}
       <DeliveryStatsCards stats={stats} loading={statsLoading} />
 
-      {/* Status */}
+      {/* Availability */}
       <DeliveryStatusCard
-        isOnline={stats?.isOnline ?? profile?.isOnline ?? false}
-        isAvailable={stats?.isAvailable ?? profile?.isAvailable ?? false}
-        status={profile?.status}
-        loading={statusUpdating}
-        error={statusError}
-        onToggle={handleStatusToggle}
+        profile={profile}
+        stats={stats}
+        loading={profileLoading || statsLoading}
+        statusUpdating={statusUpdating}
+        statusError={statusError}
+        onStatusChange={handleStatusChange}
       />
 
-      {/* Active Deliveries */}
-      <Stack spacing={1.5}>
-        <Box>
-          <Typography variant='h5' fontWeight={700}>
-            Active Deliveries
-          </Typography>
+      {/* Current Delivery */}
+      <Box>
+        <Typography variant='h6' fontWeight={700} sx={{ mb: 1.5 }}>
+          Current Delivery
+        </Typography>
 
-          <Typography variant='body2' color='textSecondary'>
-            Orders currently assigned to you.
-          </Typography>
-        </Box>
-
-        {ordersError && <Alert severity='error'>{ordersError}</Alert>}
-
-        {ordersLoading ? (
-          <Grid container spacing={2}>
-            {[1, 2].map((item) => (
-              <Grid key={item} size={{ xs: 12, lg: 6 }}>
-                <Skeleton variant='rounded' height={360} />
-              </Grid>
-            ))}
-          </Grid>
-        ) : activeOrders.length === 0 ? (
-          <Box
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 3,
-              p: {
-                xs: 4,
-                md: 6,
-              },
-              textAlign: "center",
-              bgcolor: "background.paper",
-            }}
-          >
-            <Typography variant='h6' fontWeight={600}>
-              No active deliveries
-            </Typography>
-
-            <Typography variant='body2' color='textSecondary' sx={{ mt: 0.75 }}>
-              New assigned deliveries will appear here.
-            </Typography>
-          </Box>
-        ) : (
-          <Grid container spacing={2}>
-            {activeOrders.map((order) => (
-              <Grid key={order.orderId} size={{ xs: 12, lg: 6 }}>
-                <ActiveDeliveryCard order={order} />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Stack>
+        <ActiveDeliveryCard
+          activeOrder={activeOrder}
+          actionLoading={actionLoading}
+          actionError={actionError}
+          onAction={handleDeliveryAction}
+          onViewDetails={handleViewDetails}
+        />
+      </Box>
     </Stack>
   );
 }

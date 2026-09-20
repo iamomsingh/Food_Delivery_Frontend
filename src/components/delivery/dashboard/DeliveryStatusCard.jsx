@@ -1,8 +1,8 @@
 import {
-  Alert,
   Box,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   FormControlLabel,
   Stack,
@@ -10,112 +10,227 @@ import {
   Typography,
 } from "@mui/material";
 
-import WifiOutlinedIcon from "@mui/icons-material/WifiOutlined";
-import WifiOffOutlinedIcon from "@mui/icons-material/WifiOffOutlined";
+import WifiIcon from "@mui/icons-material/Wifi";
+import WifiOffIcon from "@mui/icons-material/WifiOff";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 function DeliveryStatusCard({
-  isOnline,
-  isAvailable,
-  status,
-  loading,
-  error,
-  onToggle,
+  profile,
+  stats,
+  loading = false,
+  statusUpdating = false,
+  statusError = null,
+  onStatusChange,
 }) {
-  const isApproved = status === "APPROVED";
+  const isOnline = profile?.isOnline ?? stats?.isOnline ?? false;
+  const isAvailable = profile?.isAvailable ?? stats?.isAvailable ?? false;
+
+  const isApproved = profile?.status === "APPROVED";
+
+  const handleToggle = (event) => {
+    const nextStatus = event.target.checked;
+
+    if (!isApproved || statusUpdating) {
+      return;
+    }
+
+    onStatusChange?.(nextStatus);
+  };
+
+  let availabilityLabel = "Unavailable";
+  let availabilityColor = "default";
+
+  if (isAvailable) {
+    availabilityLabel = "Available";
+    availabilityColor = "success";
+  } else {
+    availabilityLabel = "Busy";
+    availabilityColor = "warning";
+  }
+
+  let onlineLabel = "Offline";
+  let onlineColor = "default";
+
+  if (isOnline) {
+    onlineLabel = "Online";
+    onlineColor = "success";
+  }
 
   return (
     <Card
-      elevation={0}
       sx={{
-        border: 1,
-        borderColor: "divider",
-        borderRadius: 3,
+        width: "100%",
+        border: "1px solid",
+        borderColor: isOnline ? "success.main" : "divider",
+        transition: "border-color 0.2s ease",
       }}
     >
-      <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-        <Stack
-          direction={{
-            xs: "column",
-            sm: "row",
-          }}
-          spacing={2}
-          sx={{
-            justifyContent: "space-between",
-            alignItems: {
-              xs: "stretch",
-              sm: "center",
-            },
-          }}
-        >
-          <Stack direction='row' spacing={2} sx={{ alignItems: "center" }}>
-            <Box
-              sx={{
-                width: 52,
-                height: 52,
-                borderRadius: 2.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: isOnline ? "success.light" : "action.hover",
-                color: isOnline ? "success.dark" : "text.secondary",
-              }}
-            >
-              {isOnline ? <WifiOutlinedIcon /> : <WifiOffOutlinedIcon />}
-            </Box>
-
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Stack spacing={2.5}>
+          {/* Header */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "center" },
+            }}
+            gap={1.5}
+          >
             <Box>
               <Typography variant='h6' fontWeight={700}>
-                {isOnline ? "You're online" : "You're offline"}
+                Delivery Status
+              </Typography>
+
+              <Typography
+                variant='body2'
+                color='textSecondary'
+                sx={{ mt: 0.5 }}
+              >
+                Chane your online status
+              </Typography>
+            </Box>
+
+            <Chip
+              icon={isOnline ? <WifiIcon /> : <WifiOffIcon />}
+              label={onlineLabel}
+              color={onlineColor}
+              size='small'
+            />
+          </Stack>
+
+          {/* Status Information */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: "action.hover",
+            }}
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: { xs: "flex-start", sm: "center" },
+              }}
+              gap={2}
+            >
+              <Stack
+                direction='row'
+                spacing={1.5}
+                sx={{ alignItems: "center" }}
+              >
+                <LocalShippingIcon color='action' />
+
+                <Box>
+                  <Typography variant='body2' color='textSecondary'>
+                    Availability
+                  </Typography>
+
+                  <Typography variant='body1' fontWeight={600}>
+                    {availabilityLabel}
+                  </Typography>
+                </Box>
+              </Stack>
+
+              <Chip
+                label={availabilityLabel}
+                color={availabilityColor}
+                size='small'
+              />
+            </Stack>
+          </Box>
+
+          {/* Online Toggle */}
+          <Stack
+            direction='row'
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+            gap={2}
+          >
+            <Box>
+              <Typography variant='body1' fontWeight={600}>
+                Go {isOnline ? "Offline" : "Online"}
               </Typography>
 
               <Typography variant='body2' color='textSecondary'>
                 {isOnline
-                  ? isAvailable
-                    ? "You are available for new deliveries."
-                    : "You currently have an active delivery."
-                  : "Go online when you're ready to deliver."}
+                  ? "Turn off your availability when you don't want to receive deliveries."
+                  : "Go online when you are ready to receive deliveries."}
               </Typography>
             </Box>
+
+            {statusUpdating ? (
+              <CircularProgress size={28} />
+            ) : (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isOnline}
+                    onChange={handleToggle}
+                    disabled={
+                      loading ||
+                      statusUpdating ||
+                      !isApproved ||
+                      (!isAvailable && !isOnline)
+                    }
+                  />
+                }
+                label=''
+                sx={{ m: 0 }}
+              />
+            )}
           </Stack>
 
-          <FormControlLabel
-            sx={{
-              m: 0,
-              alignSelf: {
-                xs: "flex-start",
-                sm: "center",
-              },
-            }}
-            control={
-              <Switch
-                checked={Boolean(isOnline)}
-                onChange={(event) => onToggle(event.target.checked)}
-                disabled={loading || !isApproved || (!isAvailable && !isOnline)}
-              />
-            }
-            label={
-              loading ? (
-                <CircularProgress size={18} />
-              ) : isOnline ? (
-                "Online"
-              ) : (
-                "Offline"
-              )
-            }
-          />
+          {/* Approval Warning */}
+          {!loading && !isApproved && (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1.5,
+                bgcolor: "warning.lighter",
+                color: "warning.dark",
+              }}
+            >
+              <Typography variant='body2'>
+                Your delivery partner application must be approved before you
+                can go online.
+              </Typography>
+            </Box>
+          )}
+
+          {/* Busy Warning */}
+          {!loading && isApproved && !isAvailable && (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1.5,
+                bgcolor: "info.lighter",
+                color: "info.dark",
+              }}
+            >
+              <Typography variant='body2'>
+                You currently have an active delivery. You will become available
+                again after the order is delivered.
+              </Typography>
+            </Box>
+          )}
+
+          {/* Backend Error */}
+          {statusError && (
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1.5,
+                bgcolor: "error.lighter",
+                color: "error.dark",
+              }}
+            >
+              <Typography variant='body2'>{statusError}</Typography>
+            </Box>
+          )}
         </Stack>
-
-        {!isApproved && (
-          <Alert severity='warning' sx={{ mt: 2 }}>
-            Your delivery partner application is not approved yet.
-          </Alert>
-        )}
-
-        {error && (
-          <Alert severity='error' sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
       </CardContent>
     </Card>
   );
