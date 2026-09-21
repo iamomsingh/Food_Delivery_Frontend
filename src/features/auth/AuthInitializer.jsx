@@ -10,6 +10,7 @@ import {
 import { fetchCart } from "../customer/cartSlice";
 import { getDefaultRole } from "../../utils/roleUtils";
 import { fetchDeliveryApplication } from "../delivery/deliverySlice";
+import { fetchRestaurantOwnerApplication } from "../restaurant/restaurantOwnerApplicationSlice";
 
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ function AuthInitializer({ children }) {
 
             if (user.roles.includes("CUSTOMER")) {
               await dispatch(fetchDeliveryApplication());
+              await dispatch(fetchRestaurantOwnerApplication());
               await dispatch(fetchCart());
             }
           }

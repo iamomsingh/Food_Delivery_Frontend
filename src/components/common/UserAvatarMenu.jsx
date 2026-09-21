@@ -18,6 +18,7 @@ import {
   ReceiptLong,
 } from "@mui/icons-material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 import { logout } from "../../features/auth/authSlice";
 
@@ -32,6 +33,14 @@ function UserAvatarMenu() {
   const { application, applicationLoading } = useSelector(
     (state) => state.delivery,
   );
+
+  const {
+    application: restaurantOwnerApplication,
+    applicationLoading: restaurantOwnerApplicationLoading,
+  } = useSelector((state) => state.restaurantOwnerApplication);
+
+  const isDeliveryPartner = user?.roles?.includes("DELIVERY_PARTNER");
+  const isRestaurantOwner = user?.roles?.includes("RESTAURANT_OWNER");
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -69,7 +78,6 @@ function UserAvatarMenu() {
   };
 
   const deliveryApplicationStatus = application?.status || null;
-  const isDeliveryPartner = user?.roles?.includes("DELIVERY_PARTNER");
 
   let deliveryOption = null;
 
@@ -81,7 +89,7 @@ function UserAvatarMenu() {
       };
     } else if (!application) {
       deliveryOption = {
-        label: "Become a Delivery Partner",
+        label: "Become a Delivery_Partner",
         path: "/delivery/apply",
       };
     } else if (deliveryApplicationStatus === "PENDING") {
@@ -100,6 +108,39 @@ function UserAvatarMenu() {
         path: null,
       };
     }
+  }
+
+  let restaurantOwnerMenuItem = null;
+
+  if (isRestaurantOwner) {
+    restaurantOwnerMenuItem = {
+      label: "Restaurant_Owner Dashboard",
+      path: "/restaurant/dashboard",
+    };
+  } else if (
+    !restaurantOwnerApplicationLoading &&
+    !restaurantOwnerApplication
+  ) {
+    restaurantOwnerMenuItem = {
+      label: "Become a Restaurant_Owner",
+      path: "/restaurant-owner/apply",
+    };
+  } else if (
+    !restaurantOwnerApplicationLoading &&
+    restaurantOwnerApplication?.status === "PENDING"
+  ) {
+    restaurantOwnerMenuItem = {
+      label: "Restaurant Pending",
+      path: "/restaurant-owner/application",
+    };
+  } else if (
+    !restaurantOwnerApplicationLoading &&
+    restaurantOwnerApplication?.status === "REJECTED"
+  ) {
+    restaurantOwnerMenuItem = {
+      label: "Restaurant Rejected",
+      path: "/restaurant-owner/apply",
+    };
   }
 
   return (
@@ -191,7 +232,24 @@ function UserAvatarMenu() {
           </>
         )}
 
-        <Divider />
+        {restaurantOwnerMenuItem && (
+          <>
+            <MenuItem
+              onClick={() => {
+                handleClose();
+                navigate(restaurantOwnerMenuItem.path);
+              }}
+            >
+              <ListItemIcon>
+                <StorefrontIcon fontSize='small' />
+              </ListItemIcon>
+
+              {restaurantOwnerMenuItem.label}
+            </MenuItem>
+
+            <Divider />
+          </>
+        )}
 
         {/* Logout */}
         <MenuItem onClick={handleLogout}>

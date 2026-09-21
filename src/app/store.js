@@ -16,6 +16,7 @@ import adminDashboardReducer from "../features/admin/adminDashboardSlice";
 import adminOrderReducer from "../features/admin/adminOrderSlice";
 import deliveryReducer from "../features/delivery/deliverySlice";
 import deliveryOrderReducer from "../features/delivery/deliveryOrderSlice";
+import restaurantOwnerApplicationReducer from "../features/restaurant/restaurantOwnerApplicationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -35,5 +36,6 @@ export const store = configureStore({
     adminOrder: adminOrderReducer,
     delivery: deliveryReducer,
     deliveryOrder: deliveryOrderReducer,
+    restaurantOwnerApplication: restaurantOwnerApplicationReducer,
   },
 });
