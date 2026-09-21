@@ -85,7 +85,7 @@ function DeliveryProfilePage() {
             My Profile
           </Typography>
 
-          <Typography variant='body1' color='text.secondary' sx={{ mt: 0.5 }}>
+          <Typography variant='body1' color='textSecondary' sx={{ mt: 0.5 }}>
             View your delivery partner account and performance.
           </Typography>
         </Box>

@@ -7,6 +7,12 @@ export async function applyAsDeliveryPartner(data) {
   return response.data.data;
 }
 
+// Get application status
+export async function getDeliveryApplication() {
+  const response = await api.get("/delivery/application");
+  return response.data.data;
+}
+
 // Get delivery partner profile
 export async function getDeliveryProfile() {
   const response = await api.get("/delivery/profile");

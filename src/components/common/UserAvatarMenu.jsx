@@ -17,6 +17,7 @@ import {
   Logout,
   ReceiptLong,
 } from "@mui/icons-material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 import { logout } from "../../features/auth/authSlice";
 
@@ -27,6 +28,10 @@ function UserAvatarMenu() {
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
+
+  const { application, applicationLoading } = useSelector(
+    (state) => state.delivery,
+  );
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -62,6 +67,40 @@ function UserAvatarMenu() {
 
     navigate("/");
   };
+
+  const deliveryApplicationStatus = application?.status || null;
+  const isDeliveryPartner = user?.roles?.includes("DELIVERY_PARTNER");
+
+  let deliveryOption = null;
+
+  if (!applicationLoading) {
+    if (isDeliveryPartner) {
+      deliveryOption = {
+        label: "Delivery Dashboard",
+        path: "/delivery/dashboard",
+      };
+    } else if (!application) {
+      deliveryOption = {
+        label: "Become a Delivery Partner",
+        path: "/delivery/apply",
+      };
+    } else if (deliveryApplicationStatus === "PENDING") {
+      deliveryOption = {
+        label: "Application Pending",
+        path: "/delivery/application",
+      };
+    } else if (deliveryApplicationStatus === "REJECTED") {
+      deliveryOption = {
+        label: "Application Rejected",
+        path: "/delivery/apply",
+      };
+    } else if (deliveryApplicationStatus === "SUSPENDED") {
+      deliveryOption = {
+        label: "Account Suspended",
+        path: null,
+      };
+    }
+  }
 
   return (
     <>
@@ -127,6 +166,30 @@ function UserAvatarMenu() {
           </ListItemIcon>
           My Addresses
         </MenuItem>
+
+        <Divider />
+
+        {deliveryOption && (
+          <>
+            <MenuItem
+              disabled={!deliveryOption.path}
+              onClick={() => {
+                if (!deliveryOption.path) return;
+
+                handleClose();
+                navigate(deliveryOption.path);
+              }}
+            >
+              <ListItemIcon>
+                <LocalShippingIcon fontSize='small' />
+              </ListItemIcon>
+
+              {deliveryOption.label}
+            </MenuItem>
+
+            <Divider />
+          </>
+        )}
 
         <Divider />
 

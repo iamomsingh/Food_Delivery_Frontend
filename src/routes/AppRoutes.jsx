@@ -25,6 +25,7 @@ import CheckoutPage from "../pages/customer/CheckoutPage";
 import MyOrdersPage from "../pages/customer/MyOrdersPage";
 import OrderDetailsPage from "../pages/customer/OrderDetailsPage";
 import ProfilePage from "../pages/customer/ProfilePage";
+import DeliveryPartnerApplicationPage from "../pages/delivery/DeliveryPartnerApplicationPage";
 
 // Restaurant Pages
 import RestaurantDashboardPage from "../pages/restaurant/RestaurantDashboardPage";
@@ -55,6 +56,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
 import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage";
+import DeliveryApplicationPage from "../pages/delivery/DeliveryApplicationPage";
 
 function AppRoutes() {
   return (
@@ -75,6 +77,14 @@ function AppRoutes() {
             <Route path='/orders' element={<MyOrdersPage />} />
             <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
             <Route path='/profile' element={<ProfilePage />} />
+            <Route
+              path='/delivery/apply'
+              element={<DeliveryPartnerApplicationPage />}
+            />
+            <Route
+              path='/delivery/application'
+              element={<DeliveryApplicationPage />}
+            />
           </Route>
         </Route>
 

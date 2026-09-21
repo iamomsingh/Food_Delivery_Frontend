@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
   applyAsDeliveryPartner,
+  getDeliveryApplication,
   getDeliveryProfile,
   getDeliveryStats,
   updateDeliveryOnlineStatus,
@@ -10,9 +11,12 @@ import {
 const initialState = {
   profile: null,
   stats: null,
+  application: null,
 
   profileLoading: false,
   statsLoading: false,
+  applicationLoading: false,
+
   statusUpdating: false,
   applicationSubmitting: false,
 
@@ -21,6 +25,33 @@ const initialState = {
   statusError: null,
   applicationError: null,
 };
+
+export const applyDeliveryPartner = createAsyncThunk(
+  "delivery/apply",
+  async (data, { rejectWithValue }) => {
+    try {
+      return await applyAsDeliveryPartner(data);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to submit application",
+      );
+    }
+  },
+);
+
+export const fetchDeliveryApplication = createAsyncThunk(
+  "delivery/fetchDeliveryApplication",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getDeliveryApplication();
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to fetch delivery partner application.",
+      );
+    }
+  },
+);
 
 export const fetchDeliveryProfile = createAsyncThunk(
   "delivery/fetchProfile",
@@ -56,19 +87,6 @@ export const updateDeliveryStatus = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update online status",
-      );
-    }
-  },
-);
-
-export const applyDeliveryPartner = createAsyncThunk(
-  "delivery/apply",
-  async (data, { rejectWithValue }) => {
-    try {
-      return await applyAsDeliveryPartner(data);
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to submit application",
       );
     }
   },
@@ -149,7 +167,7 @@ const deliverySlice = createSlice({
         state.statusError = action.payload;
       });
 
-    // Application
+    // Apply Application
     builder
       .addCase(applyDeliveryPartner.pending, (state) => {
         state.applicationSubmitting = true;
@@ -164,6 +182,22 @@ const deliverySlice = createSlice({
       .addCase(applyDeliveryPartner.rejected, (state, action) => {
         state.applicationSubmitting = false;
         state.applicationError = action.payload;
+      });
+
+    // Application status
+    builder
+      .addCase(fetchDeliveryApplication.pending, (state) => {
+        state.applicationLoading = true;
+        state.applicationError = null;
+      })
+      .addCase(fetchDeliveryApplication.fulfilled, (state, action) => {
+        state.applicationLoading = false;
+        state.application = action.payload;
+      })
+      .addCase(fetchDeliveryApplication.rejected, (state, action) => {
+        state.applicationLoading = false;
+        state.applicationError =
+          action.payload || "Failed to fetch delivery application.";
       });
   },
 });
