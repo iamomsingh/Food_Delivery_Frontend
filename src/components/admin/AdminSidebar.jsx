@@ -15,6 +15,7 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ReviewsIcon from "@mui/icons-material/RateReview";
 import PaymentIcon from "@mui/icons-material/Payments";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -51,15 +52,20 @@ const menuItems = [
     icon: <ShoppingBagIcon />,
   },
   {
-    label: "Reviews",
-    path: "/admin/reviews",
-    icon: <ReviewsIcon />,
+    label: "Restaurant Owner",
+    path: "/admin/restaurant-owners",
+    icon: <StorefrontIcon />,
   },
-  {
-    label: "Payments",
-    path: "/admin/payments",
-    icon: <PaymentIcon />,
-  },
+  // {
+  //   label: "Reviews",
+  //   path: "/admin/reviews",
+  //   icon: <ReviewsIcon />,
+  // },
+  // {
+  //   label: "Payments",
+  //   path: "/admin/payments",
+  //   icon: <PaymentIcon />,
+  // },
   {
     label: "Analytics",
     path: "/admin/analytics",

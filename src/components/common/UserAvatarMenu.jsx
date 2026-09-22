@@ -23,6 +23,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import { logout } from "../../features/auth/authSlice";
 
 import UserAvatar from "./UserAvatar";
+import { ROLES } from "../../constants/roles";
 
 function UserAvatarMenu() {
   const dispatch = useDispatch();
@@ -39,8 +40,8 @@ function UserAvatarMenu() {
     applicationLoading: restaurantOwnerApplicationLoading,
   } = useSelector((state) => state.restaurantOwnerApplication);
 
-  const isDeliveryPartner = user?.roles?.includes("DELIVERY_PARTNER");
-  const isRestaurantOwner = user?.roles?.includes("RESTAURANT_OWNER");
+  const isDeliveryPartner = user?.roles?.includes(ROLES.DELIVERY);
+  const isRestaurantOwner = user?.roles?.includes(ROLES.RESTAURANT);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -81,40 +82,38 @@ function UserAvatarMenu() {
 
   let deliveryOption = null;
 
-  if (!applicationLoading) {
-    if (isDeliveryPartner) {
-      deliveryOption = {
-        label: "Delivery Dashboard",
-        path: "/delivery/dashboard",
-      };
-    } else if (!application) {
-      deliveryOption = {
-        label: "Become a Delivery_Partner",
-        path: "/delivery/apply",
-      };
-    } else if (deliveryApplicationStatus === "PENDING") {
-      deliveryOption = {
-        label: "Application Pending",
-        path: "/delivery/application",
-      };
-    } else if (deliveryApplicationStatus === "REJECTED") {
-      deliveryOption = {
-        label: "Application Rejected",
-        path: "/delivery/apply",
-      };
-    } else if (deliveryApplicationStatus === "SUSPENDED") {
-      deliveryOption = {
-        label: "Account Suspended",
-        path: null,
-      };
-    }
+  if (isDeliveryPartner) {
+    deliveryOption = {
+      label: "Delivery Dashboard",
+      path: "/delivery/dashboard",
+    };
+  } else if (!applicationLoading && !application) {
+    deliveryOption = {
+      label: "Become a Delivery_Partner",
+      path: "/delivery/apply",
+    };
+  } else if (!applicationLoading && deliveryApplicationStatus === "PENDING") {
+    deliveryOption = {
+      label: "Application Pending",
+      path: "/delivery/application",
+    };
+  } else if (!applicationLoading && deliveryApplicationStatus === "REJECTED") {
+    deliveryOption = {
+      label: "Application Rejected",
+      path: "/delivery/apply",
+    };
+  } else if (!applicationLoading && deliveryApplicationStatus === "SUSPENDED") {
+    deliveryOption = {
+      label: "Account Suspended",
+      path: null,
+    };
   }
 
   let restaurantOwnerMenuItem = null;
 
   if (isRestaurantOwner) {
     restaurantOwnerMenuItem = {
-      label: "Restaurant_Owner Dashboard",
+      label: "Restaurant Dashboard",
       path: "/restaurant/dashboard",
     };
   } else if (

@@ -47,6 +47,9 @@ import AdminUsersPage from "../pages/admin/AdminUsersPage";
 import AdminUserDetailsPage from "../pages/admin/AdminUserDetailsPage";
 import AdminOrdersPage from "../pages/admin/AdminOrdersPage";
 import AdminOrderDetailsPage from "../pages/admin/AdminOrderDetailsPage";
+import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage";
+import RestaurantOwnerApplicationsPage from "../pages/admin/RestaurantOwnerApplicationsPage";
+import RestaurantOwnerApplicationDetailsPage from "../pages/admin/RestaurantOwnerApplicationDetailsPage";
 
 // Delivery-Partner Pages
 import DeliveryDashboardPage from "../pages/delivery/DeliveryDashboardPage";
@@ -58,7 +61,6 @@ import DeliveryProfilePage from "../pages/delivery/DeliveryProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
-import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage";
 
 function AppRoutes() {
   return (
@@ -125,6 +127,16 @@ function AppRoutes() {
         <Route element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}>
           <Route element={<AdminLayout />}>
             <Route path='/admin/dashboard' element={<AdminDashboardPage />} />
+
+            <Route
+              path='/admin/restaurant-owners'
+              element={<RestaurantOwnerApplicationsPage />}
+            />
+
+            <Route
+              path='/admin/restaurant-owners/:applicationId'
+              element={<RestaurantOwnerApplicationDetailsPage />}
+            />
 
             <Route
               path='/admin/restaurants'
