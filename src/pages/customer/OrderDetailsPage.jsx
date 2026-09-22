@@ -1,7 +1,4 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-
 import {
   Alert,
   Box,
@@ -10,30 +7,43 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   Grid,
+  IconButton,
+  Paper,
   Stack,
+  Step,
+  StepLabel,
+  Stepper,
   Typography,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
-import RestaurantOutlinedIcon from "@mui/icons-material/RestaurantOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import StarIcon from "@mui/icons-material/Star";
+import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
+
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   cancelOrder,
   fetchOrderById,
 } from "../../features/customer/orderSlice";
 
-const ORDER_STATUSES = [
+import {
+  fetchOrderReview,
+  removeReview,
+} from "../../features/review/reviewSlice";
+
+import ReviewDialog from "../../components/review/ReviewDialog";
+
+const STATUS_STEPS = [
   "PLACED",
   "ACCEPTED",
   "PREPARING",
@@ -43,36 +53,58 @@ const ORDER_STATUSES = [
   "DELIVERED",
 ];
 
-const STATUS_LABELS = {
-  PLACED: "Order Placed",
-  ACCEPTED: "Restaurant Accepted",
-  PREPARING: "Preparing",
-  READY_FOR_PICKUP: "Ready for Pickup",
-  PICKED_UP: "Picked Up",
-  OUT_FOR_DELIVERY: "Out for Delivery",
-  DELIVERED: "Delivered",
+const getStatusLabel = (status) => {
+  if (!status) return "";
+
+  return status
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-function formatStatus(status) {
-  return STATUS_LABELS[status] || status;
-}
-
-function formatDate(date) {
-  if (!date) return "";
-
-  return new Date(date).toLocaleString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
-function OrderDetailsPage() {
+const OrderDetailsPage = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // --------------------------------------------------
+  // Order state
+  // --------------------------------------------------
+
+  const {
+    currentOrder: order,
+    loading,
+    error,
+    cancelling,
+    cancellingOrderId,
+  } = useSelector((state) => state.order);
+
+  // --------------------------------------------------
+  // Review state
+  // --------------------------------------------------
+
+  const {
+    orderReview,
+    orderReviewLoading,
+    orderReviewError,
+    deleting,
+    deleteError,
+  } = useSelector((state) => state.review);
+
+  // --------------------------------------------------
+  // Local state
+  // --------------------------------------------------
+
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+
+  const [isDeleteReviewDialogOpen, setIsDeleteReviewDialogOpen] =
+    useState(false);
+
+  // --------------------------------------------------
+  // Fetch order
+  // --------------------------------------------------
 
   useEffect(() => {
     if (orderId) {
@@ -80,29 +112,19 @@ function OrderDetailsPage() {
     }
   }, [dispatch, orderId]);
 
-  const { currentOrder, loading, error, cancelling, cancellingOrderId } =
-    useSelector((state) => state.order);
+  // --------------------------------------------------
+  // Fetch review for this order
+  // --------------------------------------------------
 
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-
-  function handleOpenCancelDialog() {
-    setIsCancelDialogOpen(true);
-  }
-
-  function handleCloseCancelDialog() {
-    if (!isCancelling) {
-      setIsCancelDialogOpen(false);
+  useEffect(() => {
+    if (orderId) {
+      dispatch(fetchOrderReview(orderId));
     }
-  }
+  }, [dispatch, orderId]);
 
-  async function handleCancelOrder() {
-    const result = await dispatch(cancelOrder(order.id));
-
-    if (cancelOrder.fulfilled.match(result)) {
-      setIsCancelDialogOpen(false);
-      navigate("/orders");
-    }
-  }
+  // --------------------------------------------------
+  // Loading
+  // --------------------------------------------------
 
   if (loading) {
     return (
@@ -119,588 +141,654 @@ function OrderDetailsPage() {
     );
   }
 
+  // --------------------------------------------------
+  // Error
+  // --------------------------------------------------
+
   if (error) {
     return (
-      <Container maxWidth='md' sx={{ py: 6 }}>
+      <Box sx={{ p: 3 }}>
         <Alert severity='error'>{error}</Alert>
 
         <Button
+          sx={{ mt: 2 }}
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate("/orders")}
-          sx={{ mt: 2 }}
         >
           Back to Orders
         </Button>
-      </Container>
+      </Box>
     );
   }
 
-  if (!currentOrder) {
-    return null;
+  if (!order) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity='info'>Order not found.</Alert>
+      </Box>
+    );
   }
 
-  const order = currentOrder;
-  const currentStatusIndex = ORDER_STATUSES.indexOf(order.status);
+  // --------------------------------------------------
+  // Derived values
+  // --------------------------------------------------
 
   const canCancel = order.status === "PLACED" || order.status === "ACCEPTED";
-  const isCancelling = cancellingOrderId === order.id;
+
+  const canReview = order.status === "DELIVERED";
+
+  const currentStep = STATUS_STEPS.indexOf(order.status);
+
+  // --------------------------------------------------
+  // Cancel order
+  // --------------------------------------------------
+
+  const handleOpenCancelDialog = () => {
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleCloseCancelDialog = () => {
+    if (!cancelling) {
+      setIsCancelDialogOpen(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    try {
+      await dispatch(cancelOrder(order.id)).unwrap();
+
+      setIsCancelDialogOpen(false);
+
+      // Refresh order details
+      dispatch(fetchOrderById(orderId));
+    } catch (error) {
+      // Error is already handled by Redux state.
+    }
+  };
+
+  // --------------------------------------------------
+  // Review
+  // --------------------------------------------------
+
+  const handleOpenReviewDialog = () => {
+    setIsReviewDialogOpen(true);
+  };
+
+  const handleCloseReviewDialog = (review) => {
+    setIsReviewDialogOpen(false);
+
+    if (review) {
+      dispatch(fetchOrderReview(orderId));
+    }
+  };
+
+  // --------------------------------------------------
+  // Delete review
+  // --------------------------------------------------
+
+  const handleOpenDeleteReviewDialog = () => {
+    setIsDeleteReviewDialogOpen(true);
+  };
+
+  const handleCloseDeleteReviewDialog = () => {
+    if (!deleting) {
+      setIsDeleteReviewDialogOpen(false);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    if (!orderReview?.id) {
+      return;
+    }
+
+    try {
+      await dispatch(removeReview(orderReview.id)).unwrap();
+
+      setIsDeleteReviewDialogOpen(false);
+
+      dispatch(fetchOrderReview(orderId));
+    } catch (error) {
+      // Error is already handled by Redux.
+    }
+  };
 
   return (
-    <Box component='main' sx={{ pb: 6 }}>
-      <Container maxWidth='lg' sx={{ py: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/orders")}
-          sx={{ mb: 2 }}
-        >
-          My Orders
-        </Button>
+    <Box
+      sx={{
+        maxWidth: 1200,
+        mx: "auto",
+        px: { xs: 2, md: 3 },
+        py: 3,
+      }}
+    >
+      {/* ================================================
+          HEADER
+      ================================================= */}
 
-        {/* Order Header */}
+      <Stack direction='row' spacing={1} sx={{ mb: 3, alignItems: "center" }}>
+        <IconButton onClick={() => navigate("/orders")}>
+          <ArrowBackIcon />
+        </IconButton>
 
-        <Card
-          elevation={0}
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 3,
-            mb: 3,
-          }}
-        >
-          <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              sx={{ justifyContent: "space-between" }}
+        <Box>
+          <Typography variant='h5' fontWeight={700}>
+            Order Details
+          </Typography>
+
+          <Typography variant='body2' color='textSecondary'>
+            Order #{order.orderId || order.id}
+          </Typography>
+        </Box>
+      </Stack>
+
+      {/* ================================================
+          ORDER STATUS
+      ================================================= */}
+
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            sx={{
+              mb: 3,
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "center" },
+            }}
+          >
+            <Box>
+              <Typography variant='h6' fontWeight={600}>
+                Order Status
+              </Typography>
+
+              <Typography variant='body2' color='textSecondary'>
+                Track your order progress
+              </Typography>
+            </Box>
+
+            <Chip
+              label={getStatusLabel(order.status)}
+              color={
+                order.status === "DELIVERED"
+                  ? "success"
+                  : order.status === "CANCELLED" || order.status === "REJECTED"
+                    ? "error"
+                    : "primary"
+              }
+            />
+          </Stack>
+
+          {order.status !== "CANCELLED" && order.status !== "REJECTED" && (
+            <Stepper
+              activeStep={currentStep >= 0 ? currentStep : 0}
+              alternativeLabel
             >
-              <Box>
-                <Typography
-                  variant='h4'
-                  fontWeight={800}
-                  sx={{ fontSize: { xs: "1.75rem", sm: "2.125rem" } }}
-                >
-                  Order Details
+              {STATUS_STEPS.map((status) => (
+                <Step key={status}>
+                  <StepLabel>{getStatusLabel(status)}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          )}
+        </CardContent>
+      </Card>
+
+      <Grid container spacing={3}>
+        {/* ================================================
+            LEFT COLUMN
+        ================================================= */}
+
+        <Grid size={{ xs: 12, md: 8 }}>
+          {/* Restaurant */}
+
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Typography variant='h6' fontWeight={600} sx={{ mb: 2 }}>
+                Restaurant
+              </Typography>
+
+              <Typography variant='body1' fontWeight={600}>
+                {order.restaurant?.name || "Restaurant"}
+              </Typography>
+
+              {order.restaurant?.address && (
+                <Typography variant='body2' color='textSecondary'>
+                  {order.restaurant.address}
                 </Typography>
+              )}
+            </CardContent>
+          </Card>
 
-                <Typography color='text.secondary' sx={{ mt: 0.5 }}>
-                  Order #{order.orderId}
-                </Typography>
+          {/* Items */}
 
-                <Typography
-                  variant='body2'
-                  color='text.secondary'
-                  sx={{ mt: 0.5 }}
-                >
-                  Placed on {formatDate(order.placedAt)}
-                </Typography>
-              </Box>
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Typography variant='h6' fontWeight={600} sx={{ mb: 2 }}>
+                Items
+              </Typography>
 
-              <Box>
-                <Chip
-                  label={formatStatus(order.status)}
-                  color={order.status === "DELIVERED" ? "success" : "primary"}
-                  icon={<AccessTimeIcon />}
-                  sx={{ fontWeight: 600 }}
-                />
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Stack spacing={3}>
-              {/* Status Timeline */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant='h6' fontWeight={700} sx={{ mb: 3 }}>
-                    Order Status
-                  </Typography>
-
-                  <Stack spacing={0}>
-                    {ORDER_STATUSES.map((status, index) => {
-                      const log = order.statusLogs?.find(
-                        (item) => item.status === status,
-                      );
-
-                      const completed = index <= currentStatusIndex;
-
-                      const isCurrent = index === currentStatusIndex;
-
-                      const isLast = index === ORDER_STATUSES.length - 1;
-
-                      return (
-                        <Stack key={status} direction='row' spacing={2}>
-                          {/* Timeline indicator */}
-
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              width: 28,
-                              flexShrink: 0,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                bgcolor: completed
-                                  ? "primary.main"
-                                  : "action.hover",
-                                color: completed
-                                  ? "primary.contrastText"
-                                  : "text.disabled",
-                              }}
-                            >
-                              {completed ? (
-                                <CheckCircleIcon sx={{ fontSize: 18 }} />
-                              ) : (
-                                <Box
-                                  sx={{
-                                    width: 8,
-                                    height: 8,
-                                    borderRadius: "50%",
-                                    bgcolor: "text.disabled",
-                                  }}
-                                />
-                              )}
-                            </Box>
-
-                            {!isLast && (
-                              <Box
-                                sx={{
-                                  width: 2,
-                                  flex: 1,
-                                  minHeight: 42,
-                                  bgcolor:
-                                    index < currentStatusIndex
-                                      ? "primary.main"
-                                      : "divider",
-                                }}
-                              />
-                            )}
-                          </Box>
-
-                          {/* Timeline content */}
-
-                          <Box
-                            sx={{
-                              pb: isLast ? 0 : 2.5,
-                              flex: 1,
-                            }}
-                          >
-                            <Typography fontWeight={isCurrent ? 700 : 600}>
-                              {formatStatus(status)}
-                            </Typography>
-
-                            {log && (
-                              <Typography
-                                variant='body2'
-                                color='text.secondary'
-                                sx={{ mt: 0.25 }}
-                              >
-                                {formatDate(log.createdAt)}
-                              </Typography>
-                            )}
-
-                            {isCurrent && (
-                              <Typography
-                                variant='body2'
-                                color='primary.main'
-                                sx={{ mt: 0.5 }}
-                              >
-                                Current status
-                              </Typography>
-                            )}
-                          </Box>
-                        </Stack>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Restaurant */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack
-                    direction='row'
-                    spacing={1.5}
-                    sx={{ alignItems: "flex-start" }}
-                  >
-                    <RestaurantOutlinedIcon color='primary' />
-
-                    <Box>
-                      <Typography variant='body2' color='text.secondary'>
-                        Restaurant
-                      </Typography>
-
-                      <Typography variant='h6' fontWeight={700}>
-                        {order.restaurant?.name}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Items */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant='h6' fontWeight={700} sx={{ mb: 2.5 }}>
-                    Your Items
-                  </Typography>
-
-                  <Stack spacing={2}>
-                    {order.items?.map((item) => (
-                      <Stack
-                        key={item.id}
-                        direction='row'
-                        spacing={1.5}
-                        sx={{ alignItems: "center" }}
-                      >
-                        <Box
-                          component='img'
-                          src={item.itemImageUrl || "https://placehold.co/80"}
-                          alt={item.itemName}
-                          sx={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: 2,
-                            objectFit: "cover",
-                            flexShrink: 0,
-                          }}
-                        />
-
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography fontWeight={700} noWrap>
-                            {item.itemName}
-                          </Typography>
-
-                          <Typography
-                            variant='body2'
-                            color='text.secondary'
-                            sx={{ mt: 0.25 }}
-                          >
-                            ₹{item.unitPrice} × {item.quantity}
-                          </Typography>
-                        </Box>
-
-                        <Typography fontWeight={700} sx={{ flexShrink: 0 }}>
-                          ₹{item.totalPrice}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
-
-          {/* RIGHT */}
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Stack
-              spacing={3}
-              sx={{
-                position: { md: "sticky" },
-                top: { md: 24 },
-              }}
-            >
-              {/* Delivery */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  {order.delivery && (
-                    <Stack
-                      direction='row'
-                      spacing={1.5}
-                      sx={{ alignItems: "flex-start" }}
-                    >
-                      <LocationOnOutlinedIcon color='primary' />
-
-                      <Box>
-                        <Typography variant='h6' fontWeight={700}>
-                          Delivery Address
-                        </Typography>
-
-                        <Typography sx={{ mt: 1 }} fontWeight={600}>
-                          {order.delivery.name}
-                        </Typography>
-
-                        <Typography
-                          variant='body2'
-                          color='text.secondary'
-                          sx={{ mt: 0.5 }}
-                        >
-                          {order.delivery.address}
-                        </Typography>
-
-                        {order.delivery.landmark && (
-                          <Typography variant='body2' color='text.secondary'>
-                            Near {order.delivery.landmark}
-                          </Typography>
-                        )}
-
-                        <Typography variant='body2' color='text.secondary'>
-                          {order.delivery.city}, {order.delivery.state} -{" "}
-                          {order.delivery.pincode}
-                        </Typography>
-
-                        <Typography variant='body2' color='text.secondary'>
-                          {order.delivery.country}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Payment */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack
-                    direction='row'
-                    spacing={1.5}
-                    sx={{ alignItems: "flex-start" }}
-                  >
-                    <PaymentsOutlinedIcon color='primary' />
-
-                    <Box>
-                      <Typography variant='h6' fontWeight={700}>
-                        Payment
-                      </Typography>
-
-                      <Typography
-                        variant='body2'
-                        color='text.secondary'
-                        sx={{ mt: 0.5 }}
-                      >
-                        {order.pricing?.paymentMethod === "COD"
-                          ? "Cash on Delivery"
-                          : order.pricing?.paymentMethod}
-                      </Typography>
-
-                      <Chip
-                        label={order.pricing?.paymentStatus}
-                        size='small'
-                        sx={{ mt: 1 }}
-                      />
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-
-              {/* Price Summary */}
-
-              <Card
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 3,
-                }}
-              >
-                {order.pricing && (
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant='h6' fontWeight={700} sx={{ mb: 2.5 }}>
-                      Price Details
-                    </Typography>
-
-                    <Stack spacing={1.25}>
-                      <Stack
-                        direction='row'
-                        sx={{ justifyContent: "space-between" }}
-                      >
-                        <Typography color='text.secondary'>Subtotal</Typography>
-
-                        <Typography>₹{order.pricing.subtotalAmount}</Typography>
-                      </Stack>
-
-                      <Stack
-                        direction='row'
-                        sx={{ justifyContent: "space-between" }}
-                      >
-                        <Typography color='text.secondary'>
-                          Delivery Fee
-                        </Typography>
-
-                        <Typography>₹{order.pricing.deliveryFee}</Typography>
-                      </Stack>
-
-                      <Stack
-                        direction='row'
-                        sx={{ justifyContent: "space-between" }}
-                      >
-                        <Typography color='text.secondary'>Tax</Typography>
-
-                        <Typography>₹{order.pricing.taxAmount}</Typography>
-                      </Stack>
-
-                      {Number(order.pricing.discountAmount) > 0 && (
-                        <Stack
-                          direction='row'
-                          sx={{ justifyContent: "space-between" }}
-                        >
-                          <Typography color='success.main'>Discount</Typography>
-
-                          <Typography color='success.main'>
-                            -₹{order.pricing.discountAmount}
-                          </Typography>
-                        </Stack>
-                      )}
-                    </Stack>
-
-                    <Divider sx={{ my: 2 }} />
-
+              <Stack spacing={2}>
+                {order.items?.map((item) => (
+                  <Box key={item.id}>
                     <Stack
                       direction='row'
                       sx={{
                         justifyContent: "space-between",
                         alignItems: "center",
                       }}
+                      spacing={2}
                     >
-                      <Typography variant='h6' fontWeight={700}>
-                        Total
-                      </Typography>
+                      <Box>
+                        <Typography fontWeight={500}>
+                          {item.quantity} ×{" "}
+                          {item.itemName || item.menuItem?.name || "Item"}
+                        </Typography>
 
-                      <Typography variant='h5' fontWeight={800}>
-                        ₹{order.pricing.totalAmount}
+                        {item.unitPrice && (
+                          <Typography variant='body2' color='textSecondary'>
+                            ₹{item.unitPrice} each
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Typography fontWeight={600}>
+                        ₹{item.totalPrice ?? item.total ?? 0}
                       </Typography>
                     </Stack>
-                  </CardContent>
+
+                    <Divider sx={{ mt: 2 }} />
+                  </Box>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Delivery Address */}
+
+          {order.delivery && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Typography variant='h6' fontWeight={600} sx={{ mb: 2 }}>
+                  Delivery Address
+                </Typography>
+
+                <Typography fontWeight={500}>
+                  {order.delivery.address}
+                </Typography>
+
+                {order.delivery.landmark && (
+                  <Typography variant='body2' color='textSecondary'>
+                    Landmark: {order.delivery.landmark}
+                  </Typography>
                 )}
-              </Card>
 
-              {/* Order Action*/}
+                <Typography variant='body2' color='textSecondary'>
+                  {order.delivery.city}, {order.delivery.state} -{" "}
+                  {order.delivery.pincode}
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
 
-              {canCancel && (
-                <Card
-                  elevation={0}
-                  sx={{
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 3,
-                  }}
+          {/* Payment */}
+
+          {order.pricing && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Typography variant='h6' fontWeight={600} sx={{ mb: 2 }}>
+                  Payment
+                </Typography>
+
+                <Stack direction='row' sx={{ justifyContent: "space-between" }}>
+                  <Typography>Payment Method</Typography>
+
+                  <Typography fontWeight={600}>
+                    {order.pricing.method ||
+                      order.pricing.paymentMethod ||
+                      "COD"}
+                  </Typography>
+                </Stack>
+
+                <Stack
+                  direction='row'
+                  sx={{ mt: 1, justifyContent: "space-between" }}
                 >
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant='h6' fontWeight={700} sx={{ mb: 1 }}>
-                      Order Actions
-                    </Typography>
+                  <Typography>Payment Status</Typography>
 
+                  <Chip
+                    size='small'
+                    label={order.pricing.paymentStatus || "PENDING"}
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+        </Grid>
+
+        {/* ================================================
+            RIGHT COLUMN
+        ================================================= */}
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          {/* ============================================
+              PRICE SUMMARY
+          ============================================= */}
+
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Typography variant='h6' fontWeight={600} sx={{ mb: 2 }}>
+                Price Summary
+              </Typography>
+
+              {order.pricing && (
+                <Stack spacing={1.5}>
+                  <Stack
+                    direction='row'
+                    sx={{ justifyContent: "space-between" }}
+                  >
+                    <Typography>Subtotal</Typography>
+
+                    <Typography>₹{order.pricing.subtotal ?? 0}</Typography>
+                  </Stack>
+
+                  <Stack
+                    direction='row'
+                    sx={{ justifyContent: "space-between" }}
+                  >
+                    <Typography>Delivery Fee</Typography>
+
+                    <Typography>₹{order.pricing.deliveryFee ?? 0}</Typography>
+                  </Stack>
+
+                  <Stack
+                    direction='row'
+                    sx={{ justifyContent: "space-between" }}
+                  >
+                    <Typography>Tax</Typography>
+
+                    <Typography>₹{order.pricing.taxAmount ?? 0}</Typography>
+                  </Stack>
+
+                  <Divider />
+
+                  <Stack
+                    direction='row'
+                    sx={{ justifyContent: "space-between" }}
+                  >
+                    <Typography fontWeight={700}>Total</Typography>
+
+                    <Typography fontWeight={700} variant='h6'>
+                      ₹{order.pricing.totalAmount ?? 0}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ============================================
+              REVIEW
+          ============================================= */}
+
+          {canReview && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Stack
+                  direction='row'
+                  spacing={1}
+                  sx={{ mb: 1, alignItems: "center" }}
+                >
+                  <RateReviewOutlinedIcon />
+
+                  <Typography variant='h6' fontWeight={600}>
+                    Your Experience
+                  </Typography>
+                </Stack>
+
+                {orderReviewError && (
+                  <Alert severity='error' sx={{ mb: 2 }}>
+                    {orderReviewError}
+                  </Alert>
+                )}
+
+                {deleteError && (
+                  <Alert severity='error' sx={{ mb: 2 }}>
+                    {deleteError}
+                  </Alert>
+                )}
+
+                {orderReviewLoading ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      py: 2,
+                    }}
+                  >
+                    <CircularProgress size={28} />
+                  </Box>
+                ) : orderReview ? (
+                  <>
+                    {/* Restaurant Review */}
+
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant='subtitle2' color='textSecondary'>
+                        Restaurant
+                      </Typography>
+
+                      <Stack
+                        direction='row'
+                        spacing={0.5}
+                        sx={{ mt: 0.5, alignItems: "center" }}
+                      >
+                        <StarIcon fontSize='small' color='warning' />
+
+                        <Typography fontWeight={600}>
+                          {orderReview.restaurantRating}/5
+                        </Typography>
+                      </Stack>
+
+                      {orderReview.restaurantComment && (
+                        <Typography variant='body2' sx={{ mt: 0.5 }}>
+                          {orderReview.restaurantComment}
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Delivery Review */}
+
+                    {orderReview.deliveryRating != null && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant='subtitle2' color='textSecondary'>
+                          Delivery
+                        </Typography>
+
+                        <Stack
+                          direction='row'
+                          spacing={0.5}
+                          sx={{ mt: 0.5, alignItems: "center" }}
+                        >
+                          <StarIcon fontSize='small' color='warning' />
+
+                          <Typography fontWeight={600}>
+                            {orderReview.deliveryRating}/5
+                          </Typography>
+                        </Stack>
+
+                        {orderReview.deliveryComment && (
+                          <Typography variant='body2' sx={{ mt: 0.5 }}>
+                            {orderReview.deliveryComment}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+
+                    <Divider sx={{ mb: 2 }} />
+
+                    <Stack direction='row' spacing={1}>
+                      <Button
+                        variant='outlined'
+                        size='small'
+                        startIcon={<EditOutlinedIcon />}
+                        onClick={handleOpenReviewDialog}
+                      >
+                        Edit Review
+                      </Button>
+
+                      <Button
+                        variant='outlined'
+                        color='error'
+                        size='small'
+                        startIcon={<DeleteOutlinedIcon />}
+                        onClick={handleOpenDeleteReviewDialog}
+                        disabled={deleting}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </>
+                ) : (
+                  <>
                     <Typography
                       variant='body2'
-                      color='text.secondary'
+                      color='textSecondary'
                       sx={{ mb: 2 }}
                     >
-                      You can cancel this order while it is still being
-                      processed.
+                      How was your food, restaurant, and delivery experience?
                     </Typography>
 
                     <Button
-                      fullWidth
-                      variant='outlined'
-                      color='error'
-                      onClick={handleOpenCancelDialog}
-                      disabled={isCancelling}
+                      variant='contained'
+                      startIcon={<RateReviewOutlinedIcon />}
+                      onClick={handleOpenReviewDialog}
                     >
-                      {isCancelling ? "Cancelling..." : "Cancel Order"}
+                      Rate Your Order
                     </Button>
-                  </CardContent>
-                </Card>
-              )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-              <Dialog
-                open={isCancelDialogOpen}
-                onClose={handleCloseCancelDialog}
-                fullWidth
-                maxWidth='xs'
-              >
-                <DialogTitle fontWeight={700}>Cancel this order?</DialogTitle>
+          {/* ============================================
+              CANCEL ORDER
+          ============================================= */}
 
-                <DialogContent>
-                  <Typography color='text.secondary'>
-                    Are you sure you want to cancel order{" "}
-                    <strong>#{order.orderId}</strong>?
-                  </Typography>
+          {canCancel && (
+            <Card>
+              <CardContent>
+                <Typography variant='h6' fontWeight={600} sx={{ mb: 1 }}>
+                  Cancel Order
+                </Typography>
 
-                  <Typography
-                    variant='body2'
-                    color='text.secondary'
-                    sx={{ mt: 1 }}
-                  >
-                    This action cannot be undone.
-                  </Typography>
-                </DialogContent>
+                <Typography
+                  variant='body2'
+                  color='textSecondary'
+                  sx={{ mb: 2 }}
+                >
+                  You can cancel this order while it is still being accepted or
+                  prepared.
+                </Typography>
 
-                <DialogActions sx={{ px: 3, pb: 2 }}>
-                  <Button
-                    onClick={handleCloseCancelDialog}
-                    disabled={isCancelling}
-                  >
-                    Keep Order
-                  </Button>
-
-                  <Button
-                    variant='contained'
-                    color='error'
-                    onClick={handleCancelOrder}
-                    disabled={isCancelling}
-                  >
-                    {isCancelling ? "Cancelling..." : "Cancel Order"}
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </Stack>
-          </Grid>
+                <Button
+                  fullWidth
+                  variant='outlined'
+                  color='error'
+                  onClick={handleOpenCancelDialog}
+                  disabled={cancelling && cancellingOrderId === order.id}
+                >
+                  {cancelling && cancellingOrderId === order.id
+                    ? "Cancelling..."
+                    : "Cancel Order"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </Grid>
-      </Container>
+      </Grid>
+
+      {/* ================================================
+          REVIEW CREATE / EDIT DIALOG
+      ================================================= */}
+
+      <ReviewDialog
+        open={isReviewDialogOpen}
+        onClose={handleCloseReviewDialog}
+        orderId={order.id}
+        review={orderReview}
+      />
+
+      {/* ================================================
+          DELETE REVIEW CONFIRMATION
+      ================================================= */}
+
+      <Dialog
+        open={isDeleteReviewDialogOpen}
+        onClose={handleCloseDeleteReviewDialog}
+        maxWidth='xs'
+        fullWidth
+      >
+        <DialogTitle>Delete Review?</DialogTitle>
+
+        <DialogContent>
+          <Typography color='text.secondary'>
+            Are you sure you want to delete your review? This action cannot be
+            undone.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDeleteReviewDialog} disabled={deleting}>
+            Keep Review
+          </Button>
+
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleDeleteReview}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete Review"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ================================================
+          CANCEL ORDER CONFIRMATION
+      ================================================= */}
+
+      <Dialog
+        open={isCancelDialogOpen}
+        onClose={handleCloseCancelDialog}
+        maxWidth='xs'
+        fullWidth
+      >
+        <DialogTitle>Cancel Order?</DialogTitle>
+
+        <DialogContent>
+          <Typography color='text.secondary'>
+            Are you sure you want to cancel this order? This action cannot be
+            undone.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseCancelDialog} disabled={cancelling}>
+            Keep Order
+          </Button>
+
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleCancelOrder}
+            disabled={cancelling}
+          >
+            {cancelling ? "Cancelling..." : "Cancel Order"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
-}
+};
 
 export default OrderDetailsPage;
