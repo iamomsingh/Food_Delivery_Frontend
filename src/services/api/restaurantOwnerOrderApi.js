@@ -1,7 +1,9 @@
 import api from "./axios";
 
 export async function getRestaurantOrders(restaurantId, params = {}) {
-  const response = await api.get(`/restaurants/${restaurantId}/orders`);
+  const response = await api.get(`/restaurants/${restaurantId}/orders`, {
+    params,
+  });
 
   return response.data.data;
 }

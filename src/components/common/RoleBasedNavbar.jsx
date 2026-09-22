@@ -8,7 +8,7 @@ function RoleBasedNavbar() {
     (state) => state.auth,
   );
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && activeRole === "null") {
     return <PublicNavbar />;
   }
 
@@ -16,7 +16,7 @@ function RoleBasedNavbar() {
     return <CustomerNavbar />;
   }
 
-  // return <PublicNavbar />;
+  return <PublicNavbar />;
 }
 
 export default RoleBasedNavbar;

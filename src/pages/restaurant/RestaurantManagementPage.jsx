@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+
 import {
   Alert,
   Box,
@@ -32,7 +34,12 @@ function RestaurantManagementPage() {
     actionError,
   } = useSelector((state) => state.restaurantOwner);
 
-  const [createOpen, setCreateOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [createOpen, setCreateOpen] = useState(
+    searchParams.get("create") === "true",
+  );
+
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -50,11 +57,24 @@ function RestaurantManagementPage() {
     actionLoadingType === "DELETE_RESTAURANT" &&
     actionLoadingId === activeRestaurant?.id;
 
+  const handleOpenCreate = () => {
+    setCreateOpen(true);
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+
+    const params = new URLSearchParams(searchParams);
+    params.delete("create");
+
+    setSearchParams(params, { replace: true });
+  };
+
   const handleCreate = async (data) => {
     const result = await dispatch(createRestaurant(data));
 
     if (createRestaurant.fulfilled.match(result)) {
-      setCreateOpen(false);
+      handleCloseCreate();
     }
   };
 
@@ -87,20 +107,6 @@ function RestaurantManagementPage() {
     }
   };
 
-  if (!activeRestaurant) {
-    return (
-      <Box>
-        <Typography variant='h5' fontWeight={600}>
-          Restaurant Management
-        </Typography>
-
-        <Alert severity='info' sx={{ mt: 3 }}>
-          No restaurant is currently available.
-        </Alert>
-      </Box>
-    );
-  }
-
   return (
     <Box>
       <Stack
@@ -117,7 +123,7 @@ function RestaurantManagementPage() {
             Restaurant Management
           </Typography>
 
-          <Typography variant='body2' color='textSecondary' sx={{ mt: 0.5 }}>
+          <Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
             Manage your restaurant information and settings.
           </Typography>
         </Box>
@@ -125,7 +131,7 @@ function RestaurantManagementPage() {
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
           <Button
             variant='contained'
-            onClick={() => setCreateOpen(true)}
+            onClick={handleOpenCreate}
             disabled={isCreating || isUpdating || isDeleting}
           >
             + Add Restaurant
@@ -133,85 +139,112 @@ function RestaurantManagementPage() {
 
           {activeRestaurant && (
             <>
-              {" "}
               <Button
                 variant='outlined'
                 onClick={() => setEditOpen(true)}
                 disabled={isCreating || isDeleting}
               >
-                {" "}
-                Edit Restaurant{" "}
-              </Button>{" "}
+                Edit Restaurant
+              </Button>
+
               <Button
                 variant='outlined'
                 color='error'
                 onClick={() => setDeleteOpen(true)}
                 disabled={isCreating || isUpdating || isDeleting}
               >
-                {" "}
-                Delete Restaurant{" "}
-              </Button>{" "}
+                Delete Restaurant
+              </Button>
             </>
           )}
         </Stack>
       </Stack>
+
       {actionError && (
         <Alert severity='error' sx={{ mb: 3 }}>
           {actionError}
         </Alert>
-      )}{" "}
-      {activeRestaurant && <RestaurantInfoCard restaurant={activeRestaurant} />}
-      {/* Create Dialog*/}
+      )}
+
+      {/* ================================
+          RESTAURANT CONTENT
+      ================================= */}
+
+      {activeRestaurant ? (
+        <RestaurantInfoCard restaurant={activeRestaurant} />
+      ) : (
+        <Alert severity='info'>
+          You don't have a restaurant yet. Click <strong>Add Restaurant</strong>{" "}
+          to create your first restaurant.
+        </Alert>
+      )}
+
+      {/* ================================
+          CREATE RESTAURANT DIALOG
+      ================================= */}
+
       <RestaurantFormDialog
         open={createOpen}
         mode='create'
         loading={isCreating}
-        onClose={() => setCreateOpen(false)}
+        onClose={handleCloseCreate}
         onSubmit={handleCreate}
       />
-      {/* Edit Dialog */}
-      <RestaurantFormDialog
-        open={editOpen}
-        restaurant={activeRestaurant}
-        loading={isUpdating}
-        onClose={() => setEditOpen(false)}
-        onSubmit={handleUpdate}
-      />
-      {/* Delete Confirmation */}
-      <Dialog
-        open={deleteOpen}
-        onClose={isDeleting ? undefined : () => setDeleteOpen(false)}
-        maxWidth='xs'
-        fullWidth
-      >
-        <DialogTitle>Delete Restaurant?</DialogTitle>
 
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete{" "}
-            <strong>{activeRestaurant.name}</strong>?
-          </Typography>
+      {/* ================================
+          EDIT RESTAURANT DIALOG
+      ================================= */}
 
-          <Alert severity='warning' sx={{ mt: 2 }}>
-            This action cannot be undone.
-          </Alert>
-        </DialogContent>
+      {activeRestaurant && (
+        <RestaurantFormDialog
+          open={editOpen}
+          restaurant={activeRestaurant}
+          loading={isUpdating}
+          onClose={() => setEditOpen(false)}
+          onSubmit={handleUpdate}
+        />
+      )}
 
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)} disabled={isDeleting}>
-            Cancel
-          </Button>
+      {/* ================================
+          DELETE CONFIRMATION
+      ================================= */}
 
-          <Button
-            color='error'
-            variant='contained'
-            onClick={handleDelete}
-            loading={isDeleting}
-          >
-            Delete Restaurant
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {activeRestaurant && (
+        <Dialog
+          open={deleteOpen}
+          onClose={isDeleting ? undefined : () => setDeleteOpen(false)}
+          maxWidth='xs'
+          fullWidth
+        >
+          <DialogTitle>Delete Restaurant?</DialogTitle>
+
+          <DialogContent>
+            <Typography>
+              Are you sure you want to delete{" "}
+              <strong>{activeRestaurant.name}</strong>?
+            </Typography>
+
+            <Alert severity='warning' sx={{ mt: 2 }}>
+              This action cannot be undone.
+            </Alert>
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={() => setDeleteOpen(false)} disabled={isDeleting}>
+              Cancel
+            </Button>
+
+            <Button
+              color='error'
+              variant='contained'
+              onClick={handleDelete}
+              loading={isDeleting}
+            >
+              Delete Restaurant
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 }
