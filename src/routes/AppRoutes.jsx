@@ -25,6 +25,7 @@ import CheckoutPage from "../pages/customer/CheckoutPage";
 import MyOrdersPage from "../pages/customer/MyOrdersPage";
 import OrderDetailsPage from "../pages/customer/OrderDetailsPage";
 import ProfilePage from "../pages/customer/ProfilePage";
+import AddressPage from "../pages/customer/AddressPage";
 import DeliveryPartnerApplicationPage from "../pages/delivery/DeliveryPartnerApplicationPage";
 import DeliveryApplicationPage from "../pages/delivery/DeliveryApplicationPage";
 import RestaurantOwnerApplicationPage from "../pages/restaurant/RestaurantOwnerApplicationPage";
@@ -81,6 +82,7 @@ function AppRoutes() {
             <Route path='/orders' element={<MyOrdersPage />} />
             <Route path='/orders/:orderId' element={<OrderDetailsPage />} />
             <Route path='/profile' element={<ProfilePage />} />
+            <Route path='/addresses' element={<AddressPage />} />
             <Route
               path='/delivery/apply'
               element={<DeliveryPartnerApplicationPage />}

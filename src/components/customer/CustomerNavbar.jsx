@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import {
@@ -24,12 +24,14 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import AddLocationIcon from "@mui/icons-material/AddLocation";
 
 import AppLogo from "../common/AppLogo";
 import RoleSwitcher from "../common/RoleSwitcher";
 import UserAvatarMenu from "../common/UserAvatarMenu";
 
 function CustomerNavbar() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -96,6 +98,13 @@ function CustomerNavbar() {
                 </Tooltip>
 
                 <RoleSwitcher />
+
+                <IconButton
+                  onClick={() => navigate("/addresses")}
+                  aria-label='Open navigation menu'
+                >
+                  <AddLocationIcon color='action' />
+                </IconButton>
 
                 <UserAvatarMenu />
               </Box>

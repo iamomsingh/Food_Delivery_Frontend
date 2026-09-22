@@ -67,7 +67,7 @@ function UserAvatarMenu() {
 
   const handleAddresses = () => {
     handleClose();
-    navigate("/address");
+    navigate("/addresses");
   };
 
   const handleLogout = async () => {
