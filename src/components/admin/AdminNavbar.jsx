@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import AppLogo from "../common/AppLogo";
 import RoleSwitcher from "../common/RoleSwitcher";
+import UserAvatarMenu from "../common/UserAvatarMenu";
 
 function AdminNavbar({ onMenuClick }) {
   const navigate = useNavigate();
@@ -91,16 +92,7 @@ function AdminNavbar({ onMenuClick }) {
           <NotificationsNoneIcon />
         </IconButton>
 
-        <IconButton sx={{ ml: 1 }}>
-          <Avatar
-            sx={{
-              width: 36,
-              height: 36,
-            }}
-          >
-            {user?.firstName?.charAt(0)?.toUpperCase() || "A"}
-          </Avatar>
-        </IconButton>
+        <UserAvatarMenu />
       </Toolbar>
     </AppBar>
   );

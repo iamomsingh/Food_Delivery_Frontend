@@ -7,6 +7,11 @@ import {
   getCurrentUser,
   logoutUser,
 } from "../../services/api/authApi";
+import {
+  changeUserPassword,
+  getUserProfile,
+  updateUserProfile,
+} from "../../services/api/userApi";
 
 const initialState = {
   user: null,
@@ -19,6 +24,17 @@ const initialState = {
 
   isAuthenticated: false,
   authInitialized: false,
+
+  // Profile
+  profileLoading: false,
+  profileError: null,
+  profileUpdating: false,
+  profileUpdateError: null,
+
+  // Password
+  passwordChanging: false,
+  passwordChangeError: null,
+  passwordChangeSuccess: false,
 };
 
 export const register = createAsyncThunk(
@@ -69,6 +85,51 @@ export const fetchCurrentUser = createAsyncThunk(
 export const logout = createAsyncThunk("auth/logout", async () => {
   await logoutUser();
 });
+
+export const fetchProfile = createAsyncThunk(
+  "auth/fetchProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await getUserProfile();
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch profile",
+      );
+    }
+  },
+);
+
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const data = await updateUserProfile(profileData);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update profile",
+      );
+    }
+  },
+);
+
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const data = await changeUserPassword(passwordData);
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to change password",
+      );
+    }
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -172,7 +233,74 @@ const authSlice = createSlice({
       state.activeRole = null;
       state.isAuthenticated = false;
       state.error = null;
+
+      state.profileLoading = false;
+      state.profileError = null;
+      state.profileUpdating = false;
+      state.profileUpdateError = null;
+
+      state.passwordChanging = false;
+      state.passwordChangeError = null;
+      state.passwordChangeSuccess = false;
     });
+
+    // Fetch profile
+    builder
+      .addCase(fetchProfile.pending, (state) => {
+        state.profileLoading = true;
+        state.profileError = null;
+      })
+
+      .addCase(fetchProfile.fulfilled, (state, action) => {
+        state.profileLoading = false;
+
+        state.user = action.payload;
+      })
+
+      .addCase(fetchProfile.rejected, (state, action) => {
+        state.profileLoading = false;
+
+        state.profileError = action.payload || "Failed to fetch profile";
+      });
+
+    // Update profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.profileUpdating = true;
+        state.profileUpdateError = null;
+      })
+
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.profileUpdating = false;
+
+        state.user = action.payload;
+      })
+
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.profileUpdating = false;
+
+        state.profileUpdateError = action.payload || "Failed to update profile";
+      });
+
+    // Change password
+    builder
+      .addCase(changePassword.pending, (state) => {
+        state.passwordChanging = true;
+        state.passwordChangeError = null;
+        state.passwordChangeSuccess = false;
+      })
+
+      .addCase(changePassword.fulfilled, (state) => {
+        state.passwordChanging = false;
+        state.passwordChangeSuccess = true;
+      })
+
+      .addCase(changePassword.rejected, (state, action) => {
+        state.passwordChanging = false;
+
+        state.passwordChangeError =
+          action.payload || "Failed to change password";
+      });
   },
 });
 
