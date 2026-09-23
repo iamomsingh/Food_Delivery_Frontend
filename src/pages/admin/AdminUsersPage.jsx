@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import {
   fetchAdminUsers,
   updateAdminUserStatus,
+  assignAdminRole,
+  removeAdminRole,
   setUserStatusFilter,
   setUserPage,
   setUserLimit,
@@ -13,6 +15,7 @@ import {
 
 import AdminUserTable from "../../components/admin/user/AdminUserTable";
 import UserStatusDialog from "../../components/admin/user/UserStatusDialog";
+import AdminRoleDialog from "../../components/admin/user/AdminRoleDialog";
 
 import {
   Box,
@@ -52,6 +55,9 @@ function AdminUsersPage() {
 
   const [actionUser, setActionUser] = useState(null);
   const [actionStatus, setActionStatus] = useState("");
+
+  const [roleUser, setRoleUser] = useState(null);
+  const [roleAction, setRoleAction] = useState("");
 
   useEffect(() => {
     dispatch(
@@ -99,6 +105,53 @@ function AdminUsersPage() {
       );
     }
   };
+
+  const handleRoleAction = (user, action) => {
+    dispatch(clearUserActionError());
+
+    setRoleUser(user);
+    setRoleAction(action);
+  };
+
+  const handleConfirmRoleChange = async () => {
+    if (!roleUser || !roleAction) {
+      return;
+    }
+
+    let resultAction;
+
+    if (roleAction === "ASSIGN") {
+      resultAction = await dispatch(assignAdminRole(roleUser.id));
+    }
+
+    if (roleAction === "REMOVE") {
+      resultAction = await dispatch(removeAdminRole(roleUser.id));
+    }
+
+    if (
+      assignAdminRole.fulfilled.match(resultAction) ||
+      removeAdminRole.fulfilled.match(resultAction)
+    ) {
+      setRoleUser(null);
+      setRoleAction("");
+    }
+  };
+
+  const handleCloseRoleDialog = () => {
+    if (isRoleActionLoading) {
+      return;
+    }
+
+    setRoleUser(null);
+    setRoleAction("");
+
+    dispatch(clearUserActionError());
+  };
+
+  const isRoleActionLoading =
+    (actionLoadingType === "ASSIGN_ADMIN_ROLE" ||
+      actionLoadingType === "REMOVE_ADMIN_ROLE") &&
+    actionLoadingId === roleUser?.id;
 
   const isActionLoading =
     actionLoadingType === "UPDATE_USER_STATUS" &&
@@ -164,14 +217,12 @@ function AdminUsersPage() {
           </Select>
         </FormControl>
       </Box>
-
       {/* Error */}
       {error && (
         <Alert severity='error' sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
       {/* Action Error */}
       {actionError && (
         <Alert
@@ -182,7 +233,6 @@ function AdminUsersPage() {
           {actionError}
         </Alert>
       )}
-
       {/* User Table */}
       <Paper>
         <TableContainer>
@@ -206,6 +256,7 @@ function AdminUsersPage() {
                 actionLoadingId={actionLoadingId}
                 onView={handleViewUser}
                 onStatusAction={handleStatusAction}
+                onRoleAction={handleRoleAction}
               />
             </TableBody>
           </Table>
@@ -221,7 +272,6 @@ function AdminUsersPage() {
           rowsPerPageOptions={[5, 10, 20, 50]}
         />
       </Paper>
-
       {/* Status Dialog */}
       <UserStatusDialog
         open={Boolean(actionUser)}
@@ -230,6 +280,15 @@ function AdminUsersPage() {
         loading={isActionLoading}
         onClose={handleCloseDialog}
         onConfirm={handleConfirmStatusChange}
+      />
+
+      <AdminRoleDialog
+        open={Boolean(roleUser)}
+        user={roleUser}
+        action={roleAction}
+        loading={isRoleActionLoading}
+        onClose={handleCloseRoleDialog}
+        onConfirm={handleConfirmRoleChange}
       />
     </Box>
   );

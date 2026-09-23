@@ -4,6 +4,8 @@ import {
   getAdminUsers,
   getAdminUserDetails,
   updateAdminUserStatus as updateAdminUserStatusApi,
+  assignAdminRole as assignAdminRoleApi,
+  removeAdminUserRole as removeAdminUserRoleApi,
 } from "../../services/api/adminUserApi";
 
 const initialState = {
@@ -71,6 +73,34 @@ export const updateAdminUserStatus = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update user status",
+      );
+    }
+  },
+);
+
+export const assignAdminRole = createAsyncThunk(
+  "adminUser/assignAdminRole",
+
+  async (userId, { rejectWithValue }) => {
+    try {
+      return await assignAdminRoleApi(userId, "ADMIN");
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to assign ADMIN role",
+      );
+    }
+  },
+);
+
+export const removeAdminRole = createAsyncThunk(
+  "adminUser/removeAdminRole",
+
+  async (userId, { rejectWithValue }) => {
+    try {
+      return await removeAdminUserRoleApi(userId, "ADMIN");
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to remove ADMIN role",
       );
     }
   },
@@ -197,6 +227,92 @@ const adminUserSlice = createSlice({
         state.actionLoadingId = null;
 
         state.actionError = action.payload || "Failed to update user status";
+      });
+
+    // =========================
+    // Assign ADMIN Role
+    // =========================
+
+    builder
+      .addCase(assignAdminRole.pending, (state, action) => {
+        state.actionLoadingType = "ASSIGN_ADMIN_ROLE";
+        state.actionLoadingId = action.meta.arg;
+        state.actionError = null;
+      })
+
+      .addCase(assignAdminRole.fulfilled, (state, action) => {
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+
+        const updatedUser = action.payload;
+
+        const index = state.users.findIndex(
+          (user) => user.id === updatedUser.id,
+        );
+
+        if (index !== -1) {
+          state.users[index] = {
+            ...state.users[index],
+            ...updatedUser,
+          };
+        }
+
+        if (state.selectedUser?.id === updatedUser.id) {
+          state.selectedUser = {
+            ...state.selectedUser,
+            ...updatedUser,
+          };
+        }
+      })
+
+      .addCase(assignAdminRole.rejected, (state, action) => {
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+
+        state.actionError = action.payload || "Failed to assign ADMIN role";
+      });
+
+    // =========================
+    // Remove ADMIN Role
+    // =========================
+
+    builder
+      .addCase(removeAdminRole.pending, (state, action) => {
+        state.actionLoadingType = "REMOVE_ADMIN_ROLE";
+        state.actionLoadingId = action.meta.arg;
+        state.actionError = null;
+      })
+
+      .addCase(removeAdminRole.fulfilled, (state, action) => {
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+
+        const updatedUser = action.payload;
+
+        const index = state.users.findIndex(
+          (user) => user.id === updatedUser.id,
+        );
+
+        if (index !== -1) {
+          state.users[index] = {
+            ...state.users[index],
+            ...updatedUser,
+          };
+        }
+
+        if (state.selectedUser?.id === updatedUser.id) {
+          state.selectedUser = {
+            ...state.selectedUser,
+            ...updatedUser,
+          };
+        }
+      })
+
+      .addCase(removeAdminRole.rejected, (state, action) => {
+        state.actionLoadingType = null;
+        state.actionLoadingId = null;
+
+        state.actionError = action.payload || "Failed to remove ADMIN role";
       });
   },
 });

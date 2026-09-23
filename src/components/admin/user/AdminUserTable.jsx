@@ -42,8 +42,10 @@ function AdminUserTable({
   currentUserId,
   loading,
   actionLoadingId,
+  actionLoadingType,
   onView,
   onStatusAction,
+  onRoleAction,
 }) {
   if (loading) {
     return (
@@ -80,7 +82,18 @@ function AdminUserTable({
       {users.map((user) => {
         const isCurrentAdmin = user.id === currentUserId;
 
+        const hasAdminRole = user.roles?.includes("ADMIN");
+
         const isActionLoading = actionLoadingId === user.id;
+
+        const isAssigningAdmin =
+          isActionLoading && actionLoadingType === "ASSIGN_ADMIN_ROLE";
+
+        const isRemovingAdmin =
+          isActionLoading && actionLoadingType === "REMOVE_ADMIN_ROLE";
+
+        const isUpdatingStatus =
+          isActionLoading && actionLoadingType === "UPDATE_USER_STATUS";
 
         return (
           <TableRow
@@ -129,7 +142,7 @@ function AdminUserTable({
                   </Typography>
 
                   {isCurrentAdmin && (
-                    <Typography variant='caption' color='textSecondary'>
+                    <Typography variant='caption' color='text.secondary'>
                       You
                     </Typography>
                   )}
@@ -162,7 +175,13 @@ function AdminUserTable({
               align='right'
               onClick={(event) => event.stopPropagation()}
             >
-              <Stack direction='row' spacing={1} justifyContent='flex-end'>
+              <Stack
+                direction='row'
+                spacing={1}
+                justifyContent='flex-end'
+                flexWrap='wrap'
+                useFlexGap
+              >
                 <Button
                   size='small'
                   variant='outlined'
@@ -173,6 +192,7 @@ function AdminUserTable({
 
                 {!isCurrentAdmin && (
                   <>
+                    {/* Status Actions */}
                     {user.status !== "ACTIVE" && (
                       <Button
                         size='small'
@@ -181,7 +201,7 @@ function AdminUserTable({
                         disabled={isActionLoading}
                         onClick={() => onStatusAction(user, "ACTIVE")}
                       >
-                        {isActionLoading ? (
+                        {isUpdatingStatus ? (
                           <CircularProgress size={16} />
                         ) : (
                           "Activate"
@@ -198,7 +218,7 @@ function AdminUserTable({
                           disabled={isActionLoading}
                           onClick={() => onStatusAction(user, "SUSPENDED")}
                         >
-                          {isActionLoading ? (
+                          {isUpdatingStatus ? (
                             <CircularProgress size={16} />
                           ) : (
                             "Suspend"
@@ -212,13 +232,44 @@ function AdminUserTable({
                           disabled={isActionLoading}
                           onClick={() => onStatusAction(user, "BLOCKED")}
                         >
-                          {isActionLoading ? (
+                          {isUpdatingStatus ? (
                             <CircularProgress size={16} />
                           ) : (
                             "Block"
                           )}
                         </Button>
                       </>
+                    )}
+
+                    {/* ADMIN Role */}
+                    {hasAdminRole ? (
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        color='error'
+                        disabled={isActionLoading}
+                        onClick={() => onRoleAction(user, "REMOVE")}
+                      >
+                        {isRemovingAdmin ? (
+                          <CircularProgress size={16} color='inherit' />
+                        ) : (
+                          "Remove Admin"
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        disabled={isActionLoading}
+                        onClick={() => onRoleAction(user, "ASSIGN")}
+                      >
+                        {isAssigningAdmin ? (
+                          <CircularProgress size={16} color='inherit' />
+                        ) : (
+                          "Make Admin"
+                        )}
+                      </Button>
                     )}
                   </>
                 )}

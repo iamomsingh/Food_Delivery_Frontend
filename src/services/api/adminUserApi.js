@@ -21,3 +21,15 @@ export async function updateAdminUserStatus(userId, status) {
 
   return response.data.data;
 }
+
+export async function assignAdminRole(userId, role = "ADMIN") {
+  const response = await api.post(`/admin/users/${userId}/roles`, { role });
+
+  return response.data.data;
+}
+
+export async function removeAdminUserRole(userId, role) {
+  const response = await api.delete(`/admin/users/${userId}/roles/${role}`);
+
+  return response.data.data;
+}
