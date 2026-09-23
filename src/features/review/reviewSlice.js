@@ -3,10 +3,11 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createReview,
   getRestaurantReviews,
-  getDeliveryPartnerReviews,
+  // getDeliveryPartnerReviews,
   updateReview,
   deleteReview,
   getOrderReview,
+  getMyDeliveryReviews,
 } from "../../services/api/reviewApi";
 
 const initialState = {
@@ -19,10 +20,10 @@ const initialState = {
   restaurantReviewsLoading: false,
   restaurantReviewsError: null,
 
-  deliveryPartnerReviews: [],
-  deliveryPartnerReviewsPagination: null,
-  deliveryPartnerReviewsLoading: false,
-  deliveryPartnerReviewsError: null,
+  myDeliveryReviews: [],
+  myDeliveryReviewsPagination: null,
+  myDeliveryReviewsLoading: false,
+  myDeliveryReviewsError: null,
 
   creating: false,
   createError: null,
@@ -69,21 +70,17 @@ export const fetchRestaurantReviews = createAsyncThunk(
   },
 );
 
-export const fetchDeliveryPartnerReviews = createAsyncThunk(
-  "review/fetchDeliveryPartnerReviews",
-
-  async ({ deliveryPartnerId, page = 1, limit = 10 }, { rejectWithValue }) => {
+export const fetchMyDeliveryReviews = createAsyncThunk(
+  "review/fetchMyDeliveryReviews",
+  async ({ deliveryPartnerId, page = 1, limit = 5 }, { rejectWithValue }) => {
     try {
-      const data = await getDeliveryPartnerReviews(deliveryPartnerId, {
+      return await getMyDeliveryReviews(deliveryPartnerId, {
         page,
         limit,
       });
-
-      return data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          "Failed to fetch delivery partner reviews",
+        error.response?.data?.message || "Failed to fetch customer feedback",
       );
     }
   },
@@ -223,29 +220,24 @@ const reviewSlice = createSlice({
           action.payload || "Failed to fetch restaurant reviews";
       });
 
-    // ==========================================
-    // Delivery Partner Reviews
-    // ==========================================
-
+    // Deliver-Partner Reviews
     builder
-      .addCase(fetchDeliveryPartnerReviews.pending, (state) => {
-        state.deliveryPartnerReviewsLoading = true;
-        state.deliveryPartnerReviewsError = null;
+      .addCase(fetchMyDeliveryReviews.pending, (state) => {
+        state.myDeliveryReviewsLoading = true;
+        state.myDeliveryReviewsError = null;
       })
 
-      .addCase(fetchDeliveryPartnerReviews.fulfilled, (state, action) => {
-        state.deliveryPartnerReviewsLoading = false;
+      .addCase(fetchMyDeliveryReviews.fulfilled, (state, action) => {
+        state.myDeliveryReviewsLoading = false;
 
-        state.deliveryPartnerReviews = action.payload.reviews;
+        state.myDeliveryReviews = action.payload.reviews || [];
 
-        state.deliveryPartnerReviewsPagination = action.payload.pagination;
+        state.myDeliveryReviewsPagination = action.payload.pagination || null;
       })
 
-      .addCase(fetchDeliveryPartnerReviews.rejected, (state, action) => {
-        state.deliveryPartnerReviewsLoading = false;
-
-        state.deliveryPartnerReviewsError =
-          action.payload || "Failed to fetch delivery partner reviews";
+      .addCase(fetchMyDeliveryReviews.rejected, (state, action) => {
+        state.myDeliveryReviewsLoading = false;
+        state.myDeliveryReviewsError = action.payload;
       });
 
     // ==========================================

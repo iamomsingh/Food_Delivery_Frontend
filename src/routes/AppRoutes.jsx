@@ -62,6 +62,7 @@ import DeliveryProfilePage from "../pages/delivery/DeliveryProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
 import { ROLES } from "../constants/roles";
+import DeliveryReviewsPage from "../pages/delivery/DeliveryReviewsPage";
 
 function AppRoutes() {
   return (
@@ -194,6 +195,8 @@ function AppRoutes() {
             />
 
             <Route path='/delivery/profile' element={<DeliveryProfilePage />} />
+
+            <Route path='/delivery/reviews' element={<DeliveryReviewsPage />} />
           </Route>
         </Route>
       </Route>

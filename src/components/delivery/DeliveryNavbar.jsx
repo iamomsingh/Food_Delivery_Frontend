@@ -15,6 +15,7 @@ import AppLogo from "../common/AppLogo";
 import RoleSwitcher from "../common/RoleSwitcher";
 
 import { DELIVERY_NAVBAR_HEIGHT } from "../../layouts/delivery/deliveryLayout.constants";
+import UserAvatarMenu from "../common/UserAvatarMenu";
 
 function DeliveryNavbar({ onMenuClick }) {
   return (
@@ -114,22 +115,7 @@ function DeliveryNavbar({ onMenuClick }) {
         </Tooltip>
 
         {/* Account */}
-        <Tooltip title='Account'>
-          <IconButton
-            sx={{
-              ml: 0.5,
-            }}
-          >
-            <Avatar
-              sx={{
-                width: 36,
-                height: 36,
-              }}
-            >
-              D
-            </Avatar>
-          </IconButton>
-        </Tooltip>
+        <UserAvatarMenu />
       </Toolbar>
     </AppBar>
   );

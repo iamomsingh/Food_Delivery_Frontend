@@ -21,6 +21,8 @@ import {
   deliverOrder,
 } from "../../features/delivery/deliveryOrderSlice";
 
+import DeliveryCustomerFeedback from "../../components/delivery/dashboard/DeliveryCustomerFeedback";
+
 function DeliveryDashboardPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -159,7 +161,6 @@ function DeliveryDashboardPage() {
           Refresh
         </Button>
       </Stack>
-
       {/* Dashboard Error */}
       {dashboardError && (
         <Box
@@ -174,10 +175,8 @@ function DeliveryDashboardPage() {
           <Typography color='error'>{dashboardError}</Typography>
         </Box>
       )}
-
       {/* Statistics */}
       <DeliveryStatsCards stats={stats} loading={statsLoading} />
-
       {/* Availability */}
       <DeliveryStatusCard
         profile={profile}
@@ -187,7 +186,6 @@ function DeliveryDashboardPage() {
         statusError={statusError}
         onStatusChange={handleStatusChange}
       />
-
       {/* Current Delivery */}
       <Box>
         <Typography variant='h6' fontWeight={700} sx={{ mb: 1.5 }}>
@@ -202,6 +200,12 @@ function DeliveryDashboardPage() {
           onViewDetails={handleViewDetails}
         />
       </Box>
+
+      {/* Customer Feedback */}
+      <DeliveryCustomerFeedback
+        deliveryPartnerId={profile?.id}
+        onViewAll={() => navigate("/delivery/reviews")}
+      />
     </Stack>
   );
 }

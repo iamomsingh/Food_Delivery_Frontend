@@ -22,17 +22,11 @@ export async function getRestaurantReviews(restaurantId, params = {}) {
   return response.data.data;
 }
 
-// Get delivery partner reviews
-export async function getDeliveryPartnerReviews(
-  deliveryPartnerId,
-  params = {},
-) {
-  const response = await api.get(
-    `/delivery-partners/${deliveryPartnerId}/reviews`,
-    {
-      params,
-    },
-  );
+// Delivery-partner can see his review
+export async function getMyDeliveryReviews(deliveryPartnerId, params = {}) {
+  const response = await api.get(`/delivery/${deliveryPartnerId}/reviews`, {
+    params,
+  });
 
   return response.data.data;
 }
