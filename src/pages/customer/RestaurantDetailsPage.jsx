@@ -4,10 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { Box, Container } from "@mui/material";
 
-import RestaurantHeader from "../../components/customer/Restaurant/RestaurantHeader";
+import RestaurantHeader from "../../components/customer/restaurant/RestaurantHeader";
 import MenuSection from "../../components/customer/menu/MenuSection";
 import RestaurantCardSkeleton from "../../components/customer/restaurant/RestaurantCardSkeleton";
 import ErrorState from "../../components/common/ErrorState";
+import RestaurantReviews from "../../components/customer/restaurant/RestaurantReviews";
 
 import { fetchRestaurantDetails } from "../../features/customer/restaurantSlice";
 
@@ -45,6 +46,10 @@ function RestaurantDetailsPage() {
       <Container maxWidth='lg' sx={{ py: 4 }}>
         <RestaurantHeader restaurant={restaurant} />
         <MenuSection menus={menus} />
+        <RestaurantReviews
+          restaurantId={restaurant.id}
+          restaurant={restaurant}
+        />
       </Container>
     </Box>
   );

@@ -187,6 +187,7 @@ const reviewSlice = createSlice({
       .addCase(fetchOrderReview.pending, (state) => {
         state.orderReviewLoading = true;
         state.orderReviewError = null;
+        state.orderReview = null;
       })
       .addCase(fetchOrderReview.fulfilled, (state, action) => {
         state.orderReviewLoading = false;

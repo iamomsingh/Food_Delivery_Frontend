@@ -58,7 +58,7 @@ function RestaurantHeader({ restaurant }) {
               {restaurant.name}
             </Typography>
 
-            <Typography variant='body1' color='text.secondary' sx={{ mt: 1 }}>
+            <Typography variant='body1' color='text.Secondary' sx={{ mt: 1 }}>
               {restaurant.description}
             </Typography>
           </Stack>
@@ -71,11 +71,11 @@ function RestaurantHeader({ restaurant }) {
           </Stack>
 
           {/* Address */}
-          <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 3 }}>
+          {/* <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 3 }}>
             <LocationOnOutlinedIcon color='action' fontSize='small' />
 
             <Typography color='text.secondary'>Mumbai, India</Typography>
-          </Stack>
+          </Stack> */}
         </Box>
 
         <Box>
