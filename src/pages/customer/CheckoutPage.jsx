@@ -12,9 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 
-import AddressSection from "../../components/customer/Address/AddressSection";
-import OrderSummary from "../../components/customer/Checkout/OrderSummary";
-import PaymentSection from "../../components/customer/Checkout/PaymentSection";
+import AddressSection from "../../components/customer/address/AddressSection";
+import OrderSummary from "../../components/customer/checkout/OrderSummary";
+import PaymentSection from "../../components/customer/checkout/PaymentSection";
 
 import { fetchAddresses } from "../../features/customer/addressSlice";
 import { placeOrder } from "../../features/customer/orderSlice";

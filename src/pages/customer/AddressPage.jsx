@@ -26,7 +26,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 
-import AddressForm from "../../components/customer/Address/AddressForm";
+import AddressForm from "../../components/customer/address/AddressForm";
 
 import {
   fetchAddresses,
