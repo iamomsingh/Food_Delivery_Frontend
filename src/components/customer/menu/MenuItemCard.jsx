@@ -46,12 +46,14 @@ function MenuItemCard({ menuItem }) {
     <Card
       elevation={0}
       sx={{
-        p: 4,
+        p: { xs: 2, sm: 3, md: 4 },
         display: "flex",
+        flexDirection: { xs: "column-reverse", sm: "row" },
         justifyContent: "space-between",
-        gap: 3,
+        gap: { xs: 3, sm: 3 },
         borderRadius: 3,
         transition: "0.2s",
+        minWidth: 0,
 
         "&:hover": {
           boxShadow: 3,
@@ -60,11 +62,19 @@ function MenuItemCard({ menuItem }) {
     >
       {/* LEFT */}
 
-      <Box flex={1}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <FoodTypeIndicator foodType={menuItem.foodType} />
 
-        <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 1 }}>
-          <Typography variant='h6' fontWeight={700}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{ mt: 1, rowGap: 0.5, alignItems: "center", flexWrap: "wrap" }}
+        >
+          <Typography
+            variant='h6'
+            fontWeight={700}
+            sx={{ minWidth: 0, overflowWrap: "anywhere" }}
+          >
             {menuItem.name}
           </Typography>
 
@@ -75,7 +85,11 @@ function MenuItemCard({ menuItem }) {
 
         {/* PRICE */}
 
-        <Stack direction='row' spacing={1} alignItems='center' sx={{ mt: 1 }}>
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{ mt: 1, rowGap: 0.5, alignItems: "center", flexWrap: "wrap" }}
+        >
           <Typography variant='h6' fontWeight={700} color='primary'>
             ₹{menuItem.discountedPrice}
           </Typography>
@@ -83,7 +97,7 @@ function MenuItemCard({ menuItem }) {
           {hasDiscount && (
             <>
               <Typography
-                color='text.secondary'
+                color='textSecondary'
                 sx={{
                   textDecoration: "line-through",
                 }}
@@ -102,18 +116,22 @@ function MenuItemCard({ menuItem }) {
 
         {/* META */}
 
-        <Stack direction='row' spacing={2} sx={{ mt: 1 }}>
-          <Typography variant='body2' color='text.secondary'>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{ mt: 1, rowGap: 0.5, flexWrap: "wrap" }}
+        >
+          <Typography variant='body2' color='textSecondary'>
             ⭐ {menuItem.averageRating}
             {" ("}
             {menuItem.totalReviews}
             {")"}
           </Typography>
 
-          <Stack direction='row' spacing={0.5} alignItems='center'>
+          <Stack direction='row' spacing={0.5} sx={{ alignItems: "center" }}>
             <AccessTimeIcon fontSize='small' />
 
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant='body2' color='textSecondary'>
               {menuItem.preparationTimeMinutes} mins
             </Typography>
           </Stack>
@@ -130,6 +148,7 @@ function MenuItemCard({ menuItem }) {
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            overflowWrap: "anywhere",
           }}
         >
           {menuItem.description}
@@ -140,8 +159,11 @@ function MenuItemCard({ menuItem }) {
 
       <Box
         sx={{
-          width: 160,
           position: "relative",
+          width: { xs: "100%", sm: 160 },
+          flexShrink: 0,
+          // Extra space for the floating button
+          pb: 1,
         }}
       >
         <CardMedia
@@ -149,7 +171,8 @@ function MenuItemCard({ menuItem }) {
           image={menuItem.imageUrl || "https://placehold.co/200"}
           alt={menuItem.name}
           sx={{
-            height: 150,
+            width: "100%",
+            height: { xs: 200, sm: 150 },
             borderRadius: 2,
             objectFit: "cover",
           }}
@@ -165,8 +188,9 @@ function MenuItemCard({ menuItem }) {
               bottom: -18,
               left: "50%",
               transform: "translateX(-50%)",
-              width: 120,
+              width: { xs: 140, sm: 120 },
               borderRadius: 5,
+              whiteSpace: "nowrap",
             }}
             onClick={() =>
               dispatch(addCartItem({ menuItemId: menuItem.id, quantity: 1 }))
@@ -179,13 +203,13 @@ function MenuItemCard({ menuItem }) {
             variant='contained'
             sx={{
               position: "absolute",
-              bottom: -18,
+              bottom: -8,
               left: "50%",
               transform: "translateX(-50%)",
-              width: 120,
+              width: { xs: 140, sm: 120 },
 
               "& .MuiButton-root": {
-                minWidth: 40,
+                minWidth: { xs: 46, sm: 40 },
               },
             }}
           >
